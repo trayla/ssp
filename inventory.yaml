@@ -1,0 +1,29 @@
+gluster:
+  children:
+    glusterarbiter:
+      hosts:
+        gluster0:
+          ansible_host: 10.88.20.110
+          ansible_user: root
+    glusterdata:
+      hosts:
+        gluster1:
+          ansible_host: 10.88.20.111
+          ansible_user: root
+        gluster2:
+          ansible_host: 10.88.20.112
+          ansible_user: root
+kubernetes:
+  children:
+    kubenodes:
+      hosts:
+        kubenode1:
+          ansible_host: 10.88.20.121
+          ansible_user: root
+        kubenode2:
+          ansible_host: 10.88.20.122
+          ansible_user: root
+  hosts:
+    kubemaster:
+      ansible_host: 10.88.20.120
+      ansible_user: root
