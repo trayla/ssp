@@ -33,6 +33,12 @@ if [ "$1" == "install" ]; then
   ssh-keygen -f "/root/.ssh/known_hosts" -R $KUBEMASTER_IPADDR
   ssh-keygen -f "/home/sysadm/.ssh/known_hosts" -R $KUBEMASTER_IPADDR
 
+  # Do a checkout of the Kubernetes repository from GitHub
+  ansible kubemaster -i $BASEDIR/inventory.yaml -a "apt install -y git"
+  ansible kubemaster -i $BASEDIR/inventory.yaml -m file --args='path=/opt/ssp-kubernetes state=directory mode=0755 owner=sysadm group=sysadm'
+  ansible kubemaster -i $BASEDIR/inventory.yaml -a '/usr/bin/git clone https://github.com/trayla/ssp-kubernetes.git /opt/ssp-kubernetes'
+  ansible kubemaster -i $BASEDIR/inventory.yaml -a 'chown -R sysadm:sysadm /opt/ssp-kubernetes'
+
   # Create the first cluster node
   create_node 1 121
 
@@ -47,6 +53,9 @@ if [ "$1" == "install" ]; then
 
   # Install the worker nodes
   ansible-playbook -i $BASEDIR/inventory.yaml $BASEDIR/kubernetes-nodes.yaml
+
+  # Install the Gluster service
+  ansible kubemaster -i $BASEDIR/inventory.yaml -a '/usr/bin/kubectl create -f /opt/ssp-kubernetes/gluster.yaml'
 fi
 
 if [ "$1" == "remove" ]; then

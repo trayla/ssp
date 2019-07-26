@@ -18,3 +18,32 @@
       args:
         chdir: $HOME
         creates: node_joined.txt
+
+    - name: install GPG
+      apt:
+        name: gnupg
+        state: present
+
+    - name: Add an Apt signing key, will not download if present
+      apt_key:
+        url: https://download.gluster.org/pub/gluster/glusterfs/6/rsa.pub
+        state: present
+
+    - name: Add the Gluster Apt repository
+      apt_repository:
+        repo: 'ppa:gluster/glusterfs-6'
+
+    - name: Install GlusterFS client
+      apt:
+        name: glusterfs-client
+        state: present
+        update_cache: true
+
+    - name: Add host entries of all Gluster nodes on each Kubernetes node
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '.*{{ item }}$'
+        line: "{{ hostvars[item].ansible_host }} {{item}}"
+        state: present
+      when: hostvars[item].ansible_host is defined
+      with_items: "{{ groups.gluster }}"

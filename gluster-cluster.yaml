@@ -21,12 +21,6 @@
         state: present
         update_cache: true
 
-    - name: Install GlusterFS client
-      apt:
-        name: glusterfs-client
-        state: present
-        update_cache: true
-
 - hosts: gluster1
   become: yes
   tasks:

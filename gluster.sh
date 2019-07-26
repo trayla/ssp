@@ -134,8 +134,9 @@ if [ "$1" == "" ]; then
   echo "Deploys a GlusterFS based cluster"
   echo "Usage:"
   echo "  gluster.sh install"
-  echo "  gluster.sh add-disk vd[b-z]"
-  echo "  gluster.sh create-volume namespace volname"
+  echo "  gluster.sh add-disk vd[c-z]"
+  echo "  gluster.sh create-volume <namespace> <volname>"
+  echo "  gluster.sh remove-volume <namespace> <volname>"
   echo "  gluster.sh remove"
 fi
 
@@ -181,5 +182,15 @@ if [ "$1" == "create-volume" ]; then
   NAME=$3
 
   ansible gluster -i $BASEDIR/inventory.yaml -m file --args="path=/data/$NS/$NAME state=directory mode=0755"
-  ansible gluster1 -i $BASEDIR/inventory.yaml -a "gluster volume create $NS-$NAME replica 2 arbiter 1 gluster1:/data/$NS/$NAME gluster2:/data/$NS/$NAME gluster0:/data/$NS/$NAME"
+  ansible gluster0 -i $BASEDIR/inventory.yaml -a "gluster volume create $NS-$NAME replica 2 arbiter 1 gluster1:/data/$NS/$NAME gluster2:/data/$NS/$NAME gluster0:/data/$NS/$NAME --mode=script"
+  ansible gluster0 -i $BASEDIR/inventory.yaml -a "gluster volume start $NS-$NAME --mode=script"
+fi
+
+if [ "$1" == "remove-volume" ]; then
+  NS=$2
+  NAME=$3
+
+  ansible gluster0 -i $BASEDIR/inventory.yaml -a "gluster volume stop $NS-$NAME --mode=script"
+  ansible gluster0 -i $BASEDIR/inventory.yaml -a "gluster volume delete $NS-$NAME --mode=script"
+  ansible gluster -i $BASEDIR/inventory.yaml -m file --args="path=/data/$NS/$NAME state=absent"
 fi
