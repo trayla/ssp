@@ -1,3 +1,8 @@
+base:
+  hosts:
+    host:
+      ansible_host: localhost
+      ansible_user: root
 gluster:
   children:
     glusterarbiter:
