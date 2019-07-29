@@ -120,3 +120,33 @@
     virt_pool:
       name: data2
       autostart: yes
+
+  - name: Destroy the default network configuration
+    virt_net:
+      command: destroy
+      name: default 
+
+  - name: Remove the default network configuration
+    virt_net:
+      command: undefine
+      name: default
+
+  - name: Define the default network configuration
+    virt_net:
+      command: define
+      name: default
+      xml: |
+        <network>
+          <name>default</name>
+          <forward mode='nat'>
+            <nat>
+              <port start='1024' end='65535'/>
+            </nat>
+          </forward>
+          <bridge name='virbr0' stp='on' delay='0'/>
+          <ip address='10.88.20.1' netmask='255.255.255.0'>
+            <dhcp>
+              <range start='10.88.20.230' end='10.88.20.245'/>
+            </dhcp>
+          </ip>
+        </network>
