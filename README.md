@@ -100,14 +100,41 @@ If everything worked as expected you should have the following setting on your m
 The virtual machines are available through the KVM stndard command line tools:
 - `virsh list --all` lists all virtual machines
 
-#### gluster0: Arbiter node of the Gluster storage cluster
+You can gain shell access to the desired virtual machine either by opening a KVM console
+~~~~
+virsh console <vmname>
+~~~~
+or by connection to the virtual machine over SSH (password is "pw")
+~~~~
+ssh sysadm@<ipaddr>
+~~~~
 
-#### gluster1: First data node of the Gluster storage cluster
+#### gluster0
 
-#### gluster2: Second data node of the Gluster storage cluster
+Purpose: Arbiter node of the Gluster storage cluster
+IP Address: 10.88.20.110
 
-#### kubemaster: Kubernetes master
+#### gluster1
 
-#### kubenode1: First Kubernetes worker node
+Purpose: First data node of the Gluster storage cluster
+IP Address: 10.88.20.111
 
-#### kubenode2: Second Kubernetes worker node
+#### gluster2
+
+Purpose: Second data node of the Gluster storage cluster
+IP Address: 10.88.20.112
+
+#### kubemaster
+
+Purpose: Kubernetes master
+IP Address: 10.88.20.120
+
+#### kubenode1
+
+Purpose: First Kubernetes worker node
+IP Address: 10.88.20.121
+
+#### kubenode2
+
+Purpose: Second Kubernetes worker node
+IP Address: 10.88.20.122
