@@ -1,6 +1,6 @@
 # Single Server Platform - Base
 
-!!! This repository is still in progress! Do not use it right now!
+### This repository is still in progress! Do not use it right now!
 
 Ubuntu 18.04
 
