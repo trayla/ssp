@@ -150,3 +150,13 @@
             </dhcp>
           </ip>
         </network>
+
+  - name: Start the default network
+    virt_net:
+      command: start
+      name: default
+
+  - name: Set the default network to be auto started
+    virt_net:
+      autostart: yes
+      name: default
