@@ -72,6 +72,15 @@ usermod -aG sudo sysadm
 passwd -l root
 ```
 
+#### Installed scripts
+
+In order to execute the scripts you have to clone this GitHub repository to your server into the directory /opt/mgmt/ssp-base by issuing the following commands:
+```ShellSession
+mkdir -p /opt/mgmt/ssp-base
+git clone https://github.com/trayla/ssp-base.git /opt/mgmt/ssp-base
+chown -R sysadm:sysadm /opt/mgmt
+```
+
 ## Usage
 
 Call the setup stages from a root context with the following commands.
