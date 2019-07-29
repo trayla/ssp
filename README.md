@@ -112,29 +112,35 @@ ssh sysadm@<ipaddr>
 #### gluster0
 
 Purpose: Arbiter node of the Gluster storage cluster
+
 IP Address: 10.88.20.110
 
 #### gluster1
 
 Purpose: First data node of the Gluster storage cluster
+
 IP Address: 10.88.20.111
 
 #### gluster2
 
 Purpose: Second data node of the Gluster storage cluster
+
 IP Address: 10.88.20.112
 
 #### kubemaster
 
 Purpose: Kubernetes master
+
 IP Address: 10.88.20.120
 
 #### kubenode1
 
 Purpose: First Kubernetes worker node
+
 IP Address: 10.88.20.121
 
 #### kubenode2
 
 Purpose: Second Kubernetes worker node
+
 IP Address: 10.88.20.122
