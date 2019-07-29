@@ -97,8 +97,11 @@ If everything worked as expected you should have the following setting on your m
 
 ### Virtual machines:
 
-The virtual machines are available through the KVM stndard command line tools:
+The virtual machines are available through the KVM standard command line tools:
 - `virsh list --all` lists all virtual machines
+- `virsh pool-list --all` lists all storage pools
+- `virsh pool-info <poolname>` shows the details of the desired storage pool
+- `virsh --help` shows all available commands of the virtual machine management
 
 You can gain shell access to the desired virtual machine either by opening a KVM console
 ~~~~
