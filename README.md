@@ -21,32 +21,17 @@
 
 #### Storage
 
-Your system has to provide three directories which will be used as KVM storage pools and therefore populated with disk images for the upcoming virtual machines. The following directories hav to be create prior to the start of the installation procedure:
-
-#### Basic Linux packages
-
-Install necessary Ubuntu packages
-~~~~
-apt install -y \
-  xfsprogs \
-  bridge-utils sysstat apt-transport-https ca-certificates curl software-properties-common \
-  qemu-kvm libvirt-clients libvirt-daemon-system virt-manager
-~~~~
-
-##### /vmpool
-
-This directory is going to be used as the default storage pool for the KVM environment. It is recommended to provide here a redundant disk array, but according to your needs you are free here.
-
-The minimum is to create just the directory like this:
-~~~~
-mkdir -p /vmpool
-~~~~
+Your system has to provide three directories which will be used as KVM storage pools and therefore populated with disk images for the upcoming virtual machines. The following directories have to be create prior to the start of the installation procedure:
 
 ##### /data1 and /data2
 
 These directories are going to be used as redundancy nodes for the storage cluster and should be on seperate storage disks. Using a high available disk setup like RAID 1 or 5 is not necessary here due to the redenundany of the upcoming storage cluster.
 
-A sample setup could be to use a free partition on two independent disks, either directly or like described here with a customizable LVM base. In the following example we are using XFS as the file system. This is not necessary but a good choice. 
+A sample setup could be to use a free partition on two independent disks, either directly or like described here with a customizable LVM base. In the following example we are using XFS as the file system. This is not necessary but a good choice. In order to use it on a Ubuntu server you have to install the appropriate package:
+
+~~~~
+apt install -y xfsprogs
+~~~~
 
 Create the first data disk (replace /dev/sda4 by your partition device and "50g" by a storage size of your choice in giga bytes):
 
@@ -87,21 +72,42 @@ usermod -aG sudo sysadm
 passwd -l root
 ~~~~
 
-#### An up to date Ubuntu distribution
+## Usage
 
-Ensure all updates have been applied
+Call the setup stages from a root context with the following commands.
+
+Initialize the host setup by the following command. This installs and configures the KVM virtualization engine along with Ansible and the host firewall:
 ~~~~
-apt update && apt upgrade -y
+/opt/mgmt/ssp-base/host.sh prepare
 ~~~~
 
-#### A working setup of the Ansible automation package
+Setting up the Gluster based storage cluster with the following command:
+~~~~
+/opt/mgmt/ssp-base/gluster.sh install
+~~~~
 
-Install Ansible and clone this GitHub repository on your local machine:
+Setting up the Kubernetes cluster with the following command:
 ~~~~
-apt-add-repository ppa:ansible/ansible
-apt update
-apt install ansible
-mkdir -p /opt/mgmt/ssp-base
-git clone https://github.com/trayla/ssp-base.git /opt/mgmt/ssp-base
-chown -R sysadm:sysadm /opt/mgmt
+/opt/mgmt/ssp-base/kubernetes.sh install
 ~~~~
+
+## Result
+
+If everything worked as expected you should have the following setting on your machine.
+
+### Virtual machines:
+
+The virtual machines are available through the KVM stndard command line tools:
+- `virsh list --all` lists all virtual machines
+
+#### gluster0: Arbiter node of the Gluster storage cluster
+
+#### gluster1: First data node of the Gluster storage cluster
+
+#### gluster2: Second data node of the Gluster storage cluster
+
+#### kubemaster: Kubernetes master
+
+#### kubenode1: First Kubernetes worker node
+
+#### kubenode2: Second Kubernetes worker node
