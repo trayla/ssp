@@ -23,6 +23,9 @@ if [ "$1" == "prepare" ]; then
   ssh-keygen -f /root/.ssh/id_rsa -N ""
   cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
 
+  # Create SSH key pair for the sysadm user
+  ssh-keygen -f /home/sysadm/.ssh/id_rsa -N ""
+
   # Create the script repository
   mkdir -p /opt/mgmt/ssp-base
   git clone https://github.com/trayla/ssp-base.git /opt/mgmt/ssp-base

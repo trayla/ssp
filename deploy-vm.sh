@@ -55,7 +55,7 @@ network:
     ens2:
       dhcp4: no
       addresses: [$IPADDR/24]
-      gateway4: 10.88.20.10
+      gateway4: 10.88.20.1
       nameservers:
         search: [trayla.com]
         addresses: [8.8.8.8]
