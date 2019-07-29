@@ -1,6 +1,6 @@
 # Single Server Platform - Base
 
-### CAUTION: This repository is still in progress! Do not use it right now!
+### CAUTION: This repository is still in progress! Do not use it for now!
 
 ## Prerequisits
 
