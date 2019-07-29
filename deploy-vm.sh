@@ -9,7 +9,7 @@ PASSWORD=$5
 IPADDR=$6
 DISKFILE=/vmpool/${HOSTNAME}_root.qcow2
 
-tee $BASEDIR/tmp/startup.sh > /dev/null << EOF
+tee /tmp/startup.sh > /dev/null << EOF
 #!/bin/bash
 dpkg-reconfigure openssh-server
 /usr/sbin/update-grub
@@ -33,8 +33,8 @@ virt-builder ubuntu-18.04 \
   --root-password password:$PASSWORD \
   --ssh-inject root:file:/root/.ssh/id_rsa.pub \
   --ssh-inject root:file:/home/sysadm/.ssh/id_rsa.pub \
-  --install net-tools,openssh-server \
-  --firstboot $BASEDIR/tmp/startup.sh
+  --install net-tools,openssh-server,aptitude \
+  --firstboot /tmp/startup.sh
 
 guestmount -a $DISKFILE -i --rw /mnt
 
