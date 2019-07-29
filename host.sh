@@ -26,11 +26,6 @@ if [ "$1" == "prepare" ]; then
   # Create SSH key pair for the sysadm user
   ssh-keygen -f /home/sysadm/.ssh/id_rsa -N ""
 
-  # Create the script repository
-  mkdir -p /opt/mgmt/ssp-base
-  git clone https://github.com/trayla/ssp-base.git /opt/mgmt/ssp-base
-  chown -R sysadm:sysadm /opt/mgmt
-
   # Create the LVM
   ansible-playbook -i $BASEDIR/inventory.yaml $BASEDIR/host-prepare.yaml
 fi
