@@ -29,17 +29,17 @@ These directories are going to be used as redundancy nodes for the storage clust
 
 A sample setup could be to use a free partition on two independent disks, either directly or like described here with a customizable LVM base. In the following example we are using XFS as the file system. This is not necessary but a good choice. In order to use it on a Ubuntu server you have to install the appropriate package:
 
-~~~~
+~~~~ShellSession
 apt install -y xfsprogs
 ~~~~
 
 Create the first data disk (replace /dev/sda4 by your partition device and "50g" by a storage size of your choice in giga bytes):
 
-```
+```ShellSession
 mkdir -p /data1
 ```
 
-```
+```ShellSession
 pvcreate /dev/sda4
 vgcreate vgdata1 /dev/sda4
 lvcreate --size 50g -n lv0 vgdata1
