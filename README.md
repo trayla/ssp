@@ -35,61 +35,61 @@ apt install -y xfsprogs
 
 Create the first data disk (replace /dev/sda4 by your partition device and "50g" by a storage size of your choice in giga bytes):
 
-~~~~
+```
 mkdir -p /data1
-~~~~
+```
 
-~~~~
+```
 pvcreate /dev/sda4
 vgcreate vgdata1 /dev/sda4
 lvcreate --size 50g -n lv0 vgdata1
 mkfs.xfs /dev/vgdata1/lv0
 echo "/dev/vgdata1/lv0 /data1 xfs defaults 0 0" >> /etc/fstab
 mount /data1
-~~~~
+```
 
 Create the second data disk (replace /dev/sdb4 by your partition device and "50g" by a storage size of your choice in giga bytes):
 
-~~~~
+```ShellSession
 mkdir -p /data2
-~~~~
+```
 
-~~~~
+```ShellSession
 pvcreate /dev/sdb4
 vgcreate vgdata2 /dev/sdb4
 lvcreate --size 50g -n lv0 vgdata2
 mkfs.xfs /dev/vgdata2/lv0
 echo "/dev/vgdata2/lv0 /data2 xfs defaults 0 0" >> /etc/fstab
 mount /data2
-~~~~
+```
 
 #### A sudo user for system administration
 
 Create a system administrator user and disable root
-~~~~
+```ShellSession
 adduser sysadm
 usermod -aG sudo sysadm
 passwd -l root
-~~~~
+```
 
 ## Usage
 
 Call the setup stages from a root context with the following commands.
 
 Initialize the host setup by the following command. This installs and configures the KVM virtualization engine along with Ansible and the host firewall:
-~~~~
+```ShellSession
 /opt/mgmt/ssp-base/host.sh prepare
-~~~~
+```
 
 Setting up the Gluster based storage cluster with the following command:
-~~~~
+```ShellSession
 /opt/mgmt/ssp-base/gluster.sh install
-~~~~
+```
 
 Setting up the Kubernetes cluster with the following command:
-~~~~
+```ShellSession
 /opt/mgmt/ssp-base/kubernetes.sh install
-~~~~
+```
 
 ## Result
 
@@ -104,13 +104,13 @@ The virtual machines are available through the KVM standard command line tools:
 - `virsh --help` shows all available commands of the virtual machine management
 
 You can gain shell access to the desired virtual machine either by opening a KVM console
-~~~~
+```ShellSession
 virsh console <vmname>
-~~~~
+```
 or by connection to the virtual machine over SSH (password is "pw")
-~~~~
+```ShellSession
 ssh sysadm@<ipaddr>
-~~~~
+```
 
 #### gluster0
 
