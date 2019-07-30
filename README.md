@@ -104,6 +104,12 @@ Setting up the Kubernetes cluster with the following command:
 
 If everything worked as expected you should have the following setting on your machine.
 
+### Architectural Overview
+
+This picture shows an architectural overview of the desired platform:
+
+![system landscape](https://trayla.github.com/docs/systemlandscape.svg)
+
 ### Virtual machines:
 
 The virtual machines are available through the KVM standard command line tools:
