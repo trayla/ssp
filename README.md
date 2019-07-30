@@ -108,7 +108,7 @@ If everything worked as expected you should have the following setting on your m
 
 This picture shows an architectural overview of the desired platform:
 
-![system landscape](https://trayla.github.com/docs/systemlandscape.svg)
+![system landscape](/docs/systemlandscape.svg)
 
 ### Virtual machines:
 
