@@ -21,17 +21,39 @@
 
 #### Storage
 
-Your system has to provide two directories which will be used as KVM storage pools and therefore populated with disk images for the upcoming virtual machines. The following directories have to be create prior to the start of the installation procedure:
+Your system has to provide three directories which will be used as KVM storage pools and therefore populated with disk images for the upcoming virtual machines. The following directories have to be create prior to the start of the installation procedure:
 
-##### /data1 and /data2
-
-These directories are going to be used as redundancy nodes for the storage cluster and should be on seperate storage disks. Using a high available disk setup like RAID 1 or 5 is not necessary here due to the redenundany of the upcoming storage cluster.
-
-A sample setup could be to use a free partition on two independent disks, either directly or like described here with a customizable LVM base. In the following example we are using XFS as the file system. This is not necessary but a good choice. In order to use it on a Ubuntu server you have to install the appropriate package:
+A sample setup could be to use two free partition on independent disks managed by the Logical Volume Manager (LVM). In the following example we are using XFS as the file system. This is not necessary but a good choice. In order to use it on a Ubuntu server you have to install the appropriate package:
 
 ~~~~ShellSession
 apt install -y xfsprogs
 ~~~~
+
+Initialize the LVM on two disks. Please replace /dev/sda4 and /dev/sdb4 with the device of your choice.
+
+Create two physical volumes, each on one disk:
+~~~~ShellSession
+pvcreate /dev/sda4
+pvcreate /dev/sdb4
+~~~~
+
+Create two volume groups, each for one disk:
+~~~~ShellSession
+pvcreate vga /dev/sda4
+pvcreate vgb /dev/sdb4
+~~~~
+
+##### /vmpool
+
+This directory is going to be used as the default storage pool for all virtual machine images except the data images. For redundancy reasons it is recommended to store this directory at least on a RAID 1 device.
+
+~~~~ShellSession
+apt install -y xfsprogs
+~~~~
+
+##### /data1 and /data2
+
+These directories are going to be used as redundancy nodes for the storage cluster and should be on seperate storage disks. Using a high available disk setup like RAID 1 or 5 is not necessary here due to the redenundany of the upcoming storage cluster.
 
 Create the first data disk (replace /dev/sda4 by your partition device and "50g" by a storage size of your choice in giga bytes):
 
@@ -40,7 +62,6 @@ mkdir -p /data1
 ```
 
 ```ShellSession
-pvcreate /dev/sda4
 vgcreate vgdata1 /dev/sda4
 lvcreate --size 50g -n lv0 vgdata1
 mkfs.xfs /dev/vgdata1/lv0
@@ -55,7 +76,6 @@ mkdir -p /data2
 ```
 
 ```ShellSession
-pvcreate /dev/sdb4
 vgcreate vgdata2 /dev/sdb4
 lvcreate --size 50g -n lv0 vgdata2
 mkfs.xfs /dev/vgdata2/lv0
