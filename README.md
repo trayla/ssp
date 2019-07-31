@@ -7,8 +7,8 @@
 ### Hardware requirements
 
 - A running bare metal machine with a plain Ubuntu 18.04 Server installation and root access (virtual machines are not supported)
-- Minimum 8 GB RAM (16 GB recommended) 
-- Minimum 100 GB storage (250 GB recommended)
+- Minimum 16 GB RAM (32 GB recommended) 
+- Minimum 250 GB storage (500 GB recommended)
 
 ### Knowledge
 
@@ -39,47 +39,83 @@ pvcreate /dev/sdb4
 
 Create two volume groups, each for one disk:
 ~~~~ShellSession
-pvcreate vga /dev/sda4
-pvcreate vgb /dev/sdb4
+vgcreate vga /dev/sda4
+vgcreate vgb /dev/sdb4
 ~~~~
 
 ##### /vmpool
 
 This directory is going to be used as the default storage pool for all virtual machine images except the data images. For redundancy reasons it is recommended to store this directory at least on a RAID 1 device.
 
-~~~~ShellSession
-apt install -y xfsprogs
-~~~~
+Create one logical volume on each volume group as a base of the default storage pool:
+```ShellSession
+lvcreate --size 150g -n lvp vga
+lvcreate --size 150g -n lvp vgb
+```
+
+Create a RAID1 array of both newly created logical volumes to ensure redundancy:
+```ShellSession
+mdadm --create /dev/md/vmpool --level=mirror --raid-devices=2 /dev/vga/lvp /dev/vgb/lvp
+```
+
+Verify the RAID disk with the following command:
+```ShellSession
+cat /proc/mdstat
+```
+
+Format the RAID disk with a XFS filesystem:
+```ShellSession
+mkfs.xfs /dev/md/vmpool
+```
+
+Create the directory of the default storage pool:
+```ShellSession
+mkdir -p /vmpool
+```
+
+Add the newly created RAID disk to the /etc/fstab file to be automatically mounted after system restarts:
+```ShellSession
+echo "/dev/md/vmpool /vmpool xfs defaults 0 0" >> /etc/fstab
+```
+
+Mount the default storage pool:
+```ShellSession
+mount /vmpool
+```
 
 ##### /data1 and /data2
 
 These directories are going to be used as redundancy nodes for the storage cluster and should be on seperate storage disks. Using a high available disk setup like RAID 1 or 5 is not necessary here due to the redenundany of the upcoming storage cluster.
 
-Create the first data disk (replace /dev/sda4 by your partition device and "50g" by a storage size of your choice in giga bytes):
+Create the first data disk (replace /dev/sda4 by your partition device and "200g" by a storage size of your choice in giga bytes):
 
+Create the directories of the data storage pools:
 ```ShellSession
 mkdir -p /data1
-```
-
-```ShellSession
-vgcreate vgdata1 /dev/sda4
-lvcreate --size 50g -n lv0 vgdata1
-mkfs.xfs /dev/vgdata1/lv0
-echo "/dev/vgdata1/lv0 /data1 xfs defaults 0 0" >> /etc/fstab
-mount /data1
-```
-
-Create the second data disk (replace /dev/sdb4 by your partition device and "50g" by a storage size of your choice in giga bytes):
-
-```ShellSession
 mkdir -p /data2
 ```
 
+Create logical volumes for the data storage pools:
 ```ShellSession
-vgcreate vgdata2 /dev/sdb4
-lvcreate --size 50g -n lv0 vgdata2
-mkfs.xfs /dev/vgdata2/lv0
-echo "/dev/vgdata2/lv0 /data2 xfs defaults 0 0" >> /etc/fstab
+lvcreate --size 500g -n lvd vga
+lvcreate --size 500g -n lvd vgb
+```
+
+Format the disks with the XFS filesystem:
+```ShellSession
+mkfs.xfs /dev/vga/lvd
+mkfs.xfs /dev/vgb/lvd
+```
+
+Add the newly created disk to the /etc/fstab file to be automatically mounted after system restarts:
+```ShellSession
+echo "/dev/vga/lvd /data1 xfs defaults 0 0" >> /etc/fstab
+echo "/dev/vgb/lvd /data2 xfs defaults 0 0" >> /etc/fstab
+```
+
+Mount the first data storage disk:
+```ShellSession
+mount /data1
 mount /data2
 ```
 
@@ -96,8 +132,8 @@ passwd -l root
 
 In order to execute the scripts you have to clone this GitHub repository to your server into the directory /opt/mgmt/ssp-base by issuing the following commands:
 ```ShellSession
-mkdir -p /opt/mgmt/ssp-base
-git clone https://github.com/trayla/ssp-base.git /opt/mgmt/ssp-base
+mkdir -p /opt/mgmt/ssp
+git clone https://github.com/trayla/ssp.git /opt/mgmt/ssp
 chown -R sysadm:sysadm /opt/mgmt
 ```
 
@@ -107,17 +143,17 @@ Call the setup stages from a root context with the following commands.
 
 Initialize the host setup by the following command. This installs and configures the KVM virtualization engine along with Ansible and the host firewall:
 ```ShellSession
-/opt/mgmt/ssp-base/host.sh prepare
+/opt/mgmt/ssp/host.sh prepare
 ```
 
 Setting up the Gluster based storage cluster with the following command:
 ```ShellSession
-/opt/mgmt/ssp-base/gluster.sh install
+/opt/mgmt/ssp/gluster.sh install
 ```
 
 Setting up the Kubernetes cluster with the following command:
 ```ShellSession
-/opt/mgmt/ssp-base/kubernetes.sh install
+/opt/mgmt/ssp/kubernetes.sh install
 ```
 
 ## Result
