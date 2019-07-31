@@ -7,7 +7,7 @@
         chdir: $HOME
         creates: cluster_initialized.txt
 
-    - name: Create .kube directory
+    - name: Create .kube directory of the user sysadm
       become: yes
       become_user: sysadm
       file:
@@ -22,10 +22,16 @@
         remote_src: yes
         owner: sysadm
 
+    - name: Create .kube directory of the user root
+      file:
+        path: $HOME/.kube
+        state: directory
+        mode: 0755
+
     - name: Copy admin.conf to the kube config of the user root
       copy:
         src: /etc/kubernetes/admin.conf
-        dest: /root/.kube/config
+        dest: $HOME/.kube/config
         remote_src: yes
         owner: root
 
