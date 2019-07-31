@@ -130,16 +130,6 @@ if [ "$EUID" -ne 0 ]
 exit
 fi
 
-if [ "$1" == "" ]; then
-  echo "Deploys a GlusterFS based cluster"
-  echo "Usage:"
-  echo "  gluster.sh install"
-  echo "  gluster.sh add-disk vd[c-z]"
-  echo "  gluster.sh create-volume <namespace> <volname>"
-  echo "  gluster.sh remove-volume <namespace> <volname>"
-  echo "  gluster.sh remove"
-fi
-
 if [ "$1" == "install" ]; then
   # Create the arbiter node
   create_arbiternode 0 110
@@ -155,9 +145,8 @@ if [ "$1" == "install" ]; then
 
   # Install the GlusterFS Cluster
   ansible-playbook -i $BASEDIR/inventory.yaml $BASEDIR/gluster-cluster.yaml
-fi
-
-if [ "$1" == "remove" ]; then
+  
+elif [ "$1" == "remove" ]; then
   virsh destroy gluster0
   virsh undefine gluster0
 
@@ -170,27 +159,34 @@ if [ "$1" == "remove" ]; then
   rm /data2/gluster*
 
   rm /vmpool/gluster*
-fi
-
-if [ "$1" == "add-disk" ]; then
+  
+elif [ "$1" == "add-disk" ]; then
   add_disk 1 $2
   add_disk 2 $2
-fi
-
-if [ "$1" == "create-volume" ]; then
+  
+elif [ "$1" == "create-volume" ]; then
   NS=$2
   NAME=$3
 
   ansible gluster -i $BASEDIR/inventory.yaml -m file --args="path=/data/$NS/$NAME state=directory mode=0755"
   ansible gluster0 -i $BASEDIR/inventory.yaml -a "gluster volume create $NS-$NAME replica 2 arbiter 1 gluster1:/data/$NS/$NAME gluster2:/data/$NS/$NAME gluster0:/data/$NS/$NAME --mode=script"
   ansible gluster0 -i $BASEDIR/inventory.yaml -a "gluster volume start $NS-$NAME --mode=script"
-fi
-
-if [ "$1" == "remove-volume" ]; then
+  
+elif [ "$1" == "remove-volume" ]; then
   NS=$2
   NAME=$3
 
   ansible gluster0 -i $BASEDIR/inventory.yaml -a "gluster volume stop $NS-$NAME --mode=script"
   ansible gluster0 -i $BASEDIR/inventory.yaml -a "gluster volume delete $NS-$NAME --mode=script"
   ansible gluster -i $BASEDIR/inventory.yaml -m file --args="path=/data/$NS/$NAME state=absent"
+  
+else
+  echo "Deploys a GlusterFS based cluster"
+  echo "Usage:"
+  echo "  gluster.sh install"
+  echo "  gluster.sh add-disk vd[c-z]"
+  echo "  gluster.sh create-volume <namespace> <volname>"
+  echo "  gluster.sh remove-volume <namespace> <volname>"
+  echo "  gluster.sh remove"
 fi
+
