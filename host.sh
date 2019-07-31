@@ -8,7 +8,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 if [ "$1" == "" ]; then
-  echo "Prepares the host machine for the paltform installation"
+  echo "Prepares the host machine for the platform installation"
   echo "Usage:"
   echo "  host.sh prepare"
 fi
