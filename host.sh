@@ -14,7 +14,10 @@ if [ "$1" == "" ]; then
 fi
 
 if [ "$1" == "prepare" ]; then
-  # Install Ansible
+  # Install aptitude which is necessary for Ansible
+  apt install aptitude
+  
+  # Install the latest version of Ansible from the PPA repository
   apt-add-repository ppa:ansible/ansible
   apt update
   apt install ansible -y
