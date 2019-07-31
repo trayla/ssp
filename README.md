@@ -55,7 +55,7 @@ lvcreate --size 150g -n lvp vgb
 
 Create a RAID1 array of both newly created logical volumes to ensure redundancy:
 ```ShellSession
-mdadm --create /dev/md/vmpool --level=mirror --raid-devices=2 /dev/vga/lvp /dev/vgb/lvp
+mdadm --create /dev/md10 --level=mirror --raid-devices=2 /dev/vga/lvp /dev/vgb/lvp
 ```
 
 Verify the RAID disk with the following command:
@@ -65,7 +65,7 @@ cat /proc/mdstat
 
 Format the RAID disk with a XFS filesystem:
 ```ShellSession
-mkfs.xfs /dev/md/vmpool
+mkfs.xfs /dev/md10
 ```
 
 Create the directory of the default storage pool:
@@ -75,7 +75,7 @@ mkdir -p /vmpool
 
 Add the newly created RAID disk to the /etc/fstab file to be automatically mounted after system restarts:
 ```ShellSession
-echo "/dev/md/vmpool /vmpool xfs defaults 0 0" >> /etc/fstab
+echo "/dev/md10 /vmpool xfs defaults 0 0" >> /etc/fstab
 ```
 
 Mount the default storage pool:
