@@ -20,13 +20,6 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
-if [ "$1" == "" ]; then
-  echo "Deploys a Kubernetes cluster"
-  echo "Usage:"
-  echo "  kubernetes.sh install"
-  echo "  kubernetes.sh remove"
-fi
-
 if [ "$1" == "install" ]; then
   # Create the Kubernetes master
   $BASEDIR/deploy-vm.sh kubemaster 4096 4 20G pw $KUBEMASTER_IPADDR
@@ -56,9 +49,8 @@ if [ "$1" == "install" ]; then
 
   # Install the Gluster service
   ansible kubemaster -i $BASEDIR/inventory.yaml -a '/usr/bin/kubectl create -f /opt/ssp-kubernetes/gluster.yaml'
-fi
 
-if [ "$1" == "remove" ]; then
+elif [ "$1" == "remove" ]; then
   virsh destroy kubemaster
   virsh undefine kubemaster
 
@@ -69,4 +61,10 @@ if [ "$1" == "remove" ]; then
   virsh undefine kubenode2
 
   rm /vmpool/kube*
+  
+else
+  echo "Deploys a Kubernetes cluster"
+  echo "Usage:"
+  echo "  kubernetes.sh install"
+  echo "  kubernetes.sh remove"
 fi
