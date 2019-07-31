@@ -7,12 +7,6 @@ if [ "$EUID" -ne 0 ]; then
   exit
 fi
 
-if [ "$1" == "" ]; then
-  echo "Prepares the host machine for the platform installation"
-  echo "Usage:"
-  echo "  host.sh prepare"
-fi
-
 if [ "$1" == "prepare" ]; then
   # Install aptitude which is necessary for Ansible
   apt install aptitude
@@ -31,4 +25,9 @@ if [ "$1" == "prepare" ]; then
 
   # Create the LVM
   ansible-playbook -i $BASEDIR/inventory.yaml $BASEDIR/host-prepare.yaml
+  
+else
+  echo "Prepares the host machine for the platform installation"
+  echo "Usage:"
+  echo "  host.sh prepare"
 fi
