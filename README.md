@@ -1,4 +1,4 @@
-# Single Server Platform
+# SSP - Single Server Platform
 
 ### CAUTION: This repository is still in progress! Do not use it for now!
 
