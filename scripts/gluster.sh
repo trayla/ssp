@@ -122,7 +122,7 @@ function add_disk () {
   ansible gluster$1 -i $BASEDIR/../ansible/inventory.yaml -a "vgextend vg0 /dev/$2"
 
   # Add the new physical volume to the logical volume
-  ansible gluster$1 -i $BASEDIR/inventory.yaml -a "lvextend /dev/vg0/lv0 /dev/$2 -r"
+  ansible gluster$1 -i $BASEDIR/../ansible/inventory.yaml -a "lvextend /dev/vg0/lv0 /dev/$2 -r"
 }
 
 if [ "$EUID" -ne 0 ]
@@ -145,7 +145,7 @@ if [ "$1" == "install" ]; then
 
   # Install the GlusterFS Cluster
   ansible-playbook -i $BASEDIR/../ansible/inventory.yaml $BASEDIR/../ansible/gluster-cluster.yaml
-  
+
 elif [ "$1" == "remove" ]; then
   virsh destroy gluster0
   virsh undefine gluster0

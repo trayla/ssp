@@ -19,7 +19,7 @@ metadata:
   namespace: kube-system
 spec:
   rules:
-  - host: h2843115.stratoserver.net
+  - host: traefik.trayla.net
     http:
       paths:
       - path: /
