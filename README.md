@@ -137,6 +137,10 @@ git clone https://github.com/trayla/ssp.git /opt/mgmt/ssp
 chown -R sysadm:sysadm /opt/mgmt
 ```
 
+#### Domain
+
+The Single Server Platform provides a lot of services to the outside world. In order to access these service from outside the platform we are registering them as sub domains of a configurable main domain. The most comfortable way is to have a main domain like 'example.com' which points to your platform IP address by a wildcard DNS entry like this '*.example.com > 88.77.66.55'. In this case the platform can route any subdomain to the desired service by itself.
+
 ## Usage
 
 Call the setup stages from a root context with the following commands.
