@@ -62,3 +62,21 @@
   - name: Configure Kubernetes shell autocompletion
     become: yes
     shell: kubectl completion bash > /etc/bash_completion.d/kubectl
+
+  - name: Download the Helm package manager
+    get_url:
+      url: https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get
+      dest: /tmp/install-helm.sh
+      mode: '0755'
+
+  - name: Install Helm
+    shell: /tmp/install-helm.sh
+
+  - name: Create a service account for Tiller
+    shell: kubectl -n kube-system delete serviceaccounts tiller --ignore-not-found=true && kubectl -n kube-system create serviceaccount tiller
+
+  - name: Create a cluster role binding for Tiller
+    shell: kubectl -n kube-system delete clusterrolebinding tiller --ignore-not-found=true && kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+
+  - name: Initialize Helm and the Tiller companion inside the Kubernetes cluster
+    shell: helm init --service-account tiller
