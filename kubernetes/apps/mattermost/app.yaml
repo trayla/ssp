@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: trayla
+  name: mattermost-p
+spec:
+  selector:
+    matchLabels:
+      app: mattermost
+      env: p
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mattermost
+        env: p
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:9
+        env:
+        - name: POSTGRES_USER
+          value: mattermost
+        - name: POSTGRES_PASSWORD
+          value: mattermost
+#        volumeMounts:
+#         - mountPath: /var/lib/postgresql/data
+#           name: storage-postgres-data
+#           subPath: postgres-data
+      - name: mattermost
+        image: mattermost/mattermost-enterprise-edition
+        env:
+        - name: DB_HOST
+          value: "127.0.0.1"
+        - name: DB_PORT
+          value: "5432"
+        - name: MM_USERNAME
+          value: "mattermost"
+        - name: MM_PASSWORD
+          value: "mattermost"
+        - name: MM_DBNAME
+          value: "mattermost"

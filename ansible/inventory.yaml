@@ -1,0 +1,42 @@
+all:
+  children:
+    base:
+      hosts:
+        host:
+          ansible_host: localhost
+          ansible_user: root
+    gluster:
+      children:
+        glusterarbiter:
+          hosts:
+            gluster0:
+              ansible_host: 10.88.20.110
+              ansible_user: root
+              ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+        glusterdata:
+          hosts:
+            gluster1:
+              ansible_host: 10.88.20.111
+              ansible_user: root
+              ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+            gluster2:
+              ansible_host: 10.88.20.112
+              ansible_user: root
+              ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+    kubernetes:
+      children:
+        kubenodes:
+          hosts:
+            kubenode1:
+              ansible_host: 10.88.20.121
+              ansible_user: root
+              ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+            kubenode2:
+              ansible_host: 10.88.20.122
+              ansible_user: root
+              ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+      hosts:
+        kubemaster:
+          ansible_host: 10.88.20.120
+          ansible_user: root
+          ansible_ssh_common_args: '-o StrictHostKeyChecking=no'

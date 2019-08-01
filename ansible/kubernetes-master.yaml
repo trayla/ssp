@@ -1,0 +1,49 @@
+- hosts: kubemaster
+  become: yes
+  tasks:
+    - name: Initialize the cluster
+      shell: kubeadm init --pod-network-cidr=10.244.0.0/16 >> cluster_initialized.txt
+      args:
+        chdir: $HOME
+        creates: cluster_initialized.txt
+
+    - name: Create .kube directory of the user sysadm
+      become: yes
+      become_user: sysadm
+      file:
+        path: $HOME/.kube
+        state: directory
+        mode: 0755
+
+    - name: Copy admin.conf to the kube config of the user sysadm
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /home/sysadm/.kube/config
+        remote_src: yes
+        owner: sysadm
+
+    - name: Create .kube directory of the user root
+      file:
+        path: $HOME/.kube
+        state: directory
+        mode: 0755
+
+    - name: Copy admin.conf to the kube config of the user root
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: $HOME/.kube/config
+        remote_src: yes
+        owner: root
+
+    - name: Install pod network
+      become: yes
+      become_user: sysadm
+      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml >> pod_netw$
+      args:
+        chdir: $HOME
+        creates: pod_network_setup.txt
+
+    - name: Configure Kubernetes shell autocompletion
+      become: yes
+      shell: kubectl completion bash > /etc/bash_completion.d/kubectl
+

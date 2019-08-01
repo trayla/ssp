@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: trayla
+  name: bookstack-p
+spec:
+  selector:
+    matchLabels:
+      app: bookstack
+      env: p
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bookstack
+        env: p
+    spec:
+      containers:
+      - image: linuxserver/mariadb
+        name: database
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            value: "secret"
+          - name: MYSQL_DATABASE
+            value: "bookstack"
+          - name: MYSQL_USER     
+            value: "bookstack"
+          - name: MYSQL_PASSWORD  
+            value: "secret"
+        volumeMounts:
+          - name: data
+            mountPath: /config
+      - image: linuxserver/bookstack
+        name: bookstack
+        env:
+          - name: DB_HOST
+            value: "127.0.0.1"
+          - name: DB_DATABASE
+            value: "bookstack"
+          - name: DB_USERNAME
+            value: "bookstack"
+          - name: DB_PASSWORD
+            value: "secret"
+          - name: APP_URL
+            value: "https://wiki.trayla.com"
+        volumeMounts:
+          - name: data
+            mountPath: /config       
+        ports:
+        - name: http
+          containerPort: 80
+      volumes:
+        - name: data
+          glusterfs:
+            endpoints: gluster
+            path: bookstack-data
+            readOnly: false

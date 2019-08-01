@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dockerreg
+spec:
+  selector:
+    matchLabels:
+      app: dockerreg
+      env: p
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: dockerreg
+        env: p
+    spec:
+      containers:
+      - name: registry
+        image: registry
+        volumeMounts:
+          - name: data
+            mountPath: /var/lib/registry
+        ports:
+        - name: http
+          containerPort: 5000
+      volumes:
+      - name: data
+        glusterfs:
+          endpoints: gluster
+          path: default-dockerreg
+          readOnly: false
