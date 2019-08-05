@@ -1,0 +1,12 @@
+- hosts: host
+  become: yes
+  tasks:
+
+  # Install the Traefik web proxy via it's officially supported Helm package
+
+  - name: Install the Traefik Helm package
+    shell: helm install stable/traefik --name traefik --set dashboard.enabled=true,serviceType=NodePort,dashboard.domain=traefik.trayla.net,rbac.enabled=true,dashboard.auth.basic.traefik='$apr1$vUmd7ddA$CoklUZpHBbRzvnZUz6eFY.' --namespace kube-system
+
+# Include firewall settings
+- name: Include the Kubernetes firewall settings
+    import_playbook: kubernetes-firewall.yaml

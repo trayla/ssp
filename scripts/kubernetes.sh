@@ -47,6 +47,9 @@ if [ "$1" == "install" ]; then
   # Install the Gluster service
   ansible host -i $BASEDIR/../ansible/inventory.yaml -a '/usr/bin/kubectl create -f /opt/mgmt/ssp/kubernetes/gluster.yaml'
 
+  # Install the Ingress
+  ansible-playbook -i $BASEDIR/../ansible/inventory.yaml $BASEDIR/../ansible/kubernetes-ingress.yaml
+
 elif [ "$1" == "remove" ]; then
   virsh destroy kubemaster
   virsh undefine kubemaster

@@ -1,11 +1,16 @@
 - hosts: kubemaster
   become: yes
   tasks:
+
+    # Initialize the Kubernetes cluster
+
     - name: Initialize the cluster
       shell: kubeadm init --pod-network-cidr=10.244.0.0/16 >> cluster_initialized.txt
       args:
         chdir: $HOME
         creates: cluster_initialized.txt
+
+    # Copy the Kubernetes command line client configuration into the home directories of root and sysadm to allow cluster connection
 
     - name: Create .kube directory of the user sysadm
       become: yes
@@ -35,15 +40,18 @@
         remote_src: yes
         owner: root
 
+    # Install the Flannel SDN (Software Defined Network) implementation
+
     - name: Install pod network
       become: yes
       become_user: sysadm
-      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml >> pod_netw$
+      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
       args:
         chdir: $HOME
         creates: pod_network_setup.txt
 
+    # Enable autocompletion support for the Kubernetes command line tools
+
     - name: Configure Kubernetes shell autocompletion
       become: yes
       shell: kubectl completion bash > /etc/bash_completion.d/kubectl
-

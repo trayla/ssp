@@ -1,0 +1,55 @@
+- hosts: host
+  become: yes
+  tasks:
+
+  # Wait for the Traefik service to come up
+  - name: Wait for the Traefik service to come up
+    shell: kubectl -n kube-system get svc traefik
+    register: result
+    until: result.stdout.find("NodePort") != -1
+    retries: 50
+    delay: 10
+
+  - name: Determine the dynamic HTTP port of the Traefik service
+    shell: kubectl -n kube-system get svc traefik -o jsonpath='{.spec.ports[0].nodePort}'
+    register: traefik_port_http
+
+  - name: Determine the dynamic HTTPS port of the Traefik service
+    shell: kubectl -n kube-system get svc traefik -o jsonpath='{.spec.ports[1].nodePort}'
+    register: traefik_port_https
+
+  - name: Show the ports of the Traefik service
+    debug:
+      msg: 'Traefik ports: http={{ traefik_port_http.stdout }}, https={{ traefik_port_https.stdout }}'
+
+  - name: Create port forwarding of http host port to node port {{ traefik_port_http.stdout }}
+    iptables:
+      table: nat
+      chain: PREROUTING
+      protocol: tcp
+      destination_port: '80'
+      jump: DNAT
+      to_destination: '{{ hostvars.kubemaster.ansible_host }}:{{ traefik_port_http.stdout }}'
+
+  - name: Create port forwarding of https host port to node port {{ traefik_port_https.stdout }}
+    iptables:
+      table: nat
+      chain: PREROUTING
+      protocol: tcp
+      destination_port: '443'
+      jump: DNAT
+      to_destination: '{{ hostvars.kubemaster.ansible_host }}:{{ traefik_port_https.stdout }}'
+
+  - name: Masquerade http and https ports
+    iptables:
+      table: nat
+      chain: POSTROUTING
+      protocol: tcp
+      source: 10.88.20.0/24
+      destination: '{{ hostvars.kubemaster.ansible_host }}/32'
+      match: multiport
+      jump: MASQUERADE
+      destination_port: 80,443
+
+  - name: Allow forwarding of inbound traffic
+    shell: '/sbin/iptables -I FORWARD -m state -d 10.88.20.0/24 --state NEW,RELATED,ESTABLISHED -j ACCEPT'

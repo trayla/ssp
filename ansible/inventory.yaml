@@ -13,16 +13,19 @@ all:
               ansible_host: 10.88.20.110
               ansible_user: root
               ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+              ssp_vm: true
         glusterdata:
           hosts:
             gluster1:
               ansible_host: 10.88.20.111
               ansible_user: root
               ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+              ssp_vm: true
             gluster2:
               ansible_host: 10.88.20.112
               ansible_user: root
               ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+              ssp_vm: true
     kubernetes:
       children:
         kubenodes:
@@ -31,12 +34,15 @@ all:
               ansible_host: 10.88.20.121
               ansible_user: root
               ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+              ssp_vm: true
             kubenode2:
               ansible_host: 10.88.20.122
               ansible_user: root
               ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+              ssp_vm: true
       hosts:
         kubemaster:
           ansible_host: 10.88.20.120
           ansible_user: root
           ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+          ssp_vm: true

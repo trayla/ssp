@@ -1,0 +1,8 @@
+ansible_python_interpreter: /usr/bin/python3
+
+global:
+  domain: trayla.net
+
+kubernetes:
+  podnetwork:
+    cidr: 10.90.0.0/16

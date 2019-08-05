@@ -1,6 +1,9 @@
 - hosts: kubemaster
   become: yes
   tasks:
+
+  # Copy the Kubernetes client configuration on the Kubernetes master
+
   - name: Copy Kubernetes configuration from the Kubernetes master to the local sysadm user
     fetch:
       src: /home/sysadm/.kube/config
@@ -16,6 +19,9 @@
 - hosts: host
   become: yes
   tasks:
+
+  # Disable Swap files because these are not supported on Docker hosts
+
   - name: Remove swapfile from /etc/fstab
     mount:
       path: none
@@ -26,11 +32,15 @@
     command: swapoff -a
     when: ansible_swaptotal_mb > 0
 
+  # Install Docker
+
   - name: Install Docker
     apt:
       name: docker.io
       state: present
       update_cache: true
+
+  # Install the Kubernetes management tools
 
   - name: Install GPG
     apt:
@@ -63,6 +73,8 @@
     become: yes
     shell: kubectl completion bash > /etc/bash_completion.d/kubectl
 
+  # Install the Helm package manager along with the Tiller Companion inside the Kubernetes cluster
+
   - name: Download the Helm package manager
     get_url:
       url: https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get
@@ -80,3 +92,15 @@
 
   - name: Initialize Helm and the Tiller companion inside the Kubernetes cluster
     shell: helm init --service-account tiller
+    register: helm_init_result
+
+  - name: Show Helm init result
+    debug:
+      msg: "{{ helm_init_result.stdout_lines }}"
+
+  - name: Ensure that Tiller is running
+    shell: kubectl get pods --namespace kube-system -l name=tiller
+    register: kubectl_kube_system_pods
+    until: kubectl_kube_system_pods.stdout.find("Running") != -1
+    retries: 5
+    delay: 10

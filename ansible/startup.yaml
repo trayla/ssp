@@ -1,0 +1,25 @@
+- hosts: host
+  become: yes
+  tasks:
+
+  # Wait some time to let the KVM service be started
+  - pause:
+      seconds: 60
+
+  # Start all virtual machines
+  - name: Starting virtual machines
+    shell: '/usr/bin/virsh -c qemu:///system start {{ item }}'
+    when: hostvars[item].ssp_vm is defined
+    with_items: "{{ groups.all }}"
+
+  # Wait for the Kubernetes cluster to come up
+  - name: Wait for the Traefik service to come up
+    shell: kubectl cluster-info
+    register: result
+    until: result.stdout.find("running") != -1
+    retries: 50
+    delay: 10
+
+# Include Kubernetes firewall settings
+- name: Include the Kubernetes firewall settings
+  import_playbook: kubernetes-firewall.yaml
