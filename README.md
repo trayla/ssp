@@ -7,8 +7,8 @@
 ### Hardware requirements
 
 - A running bare metal machine with a plain Ubuntu 18.04 Server installation and root access (virtual machines are not supported)
-- Minimum 16 GB RAM (32 GB recommended) 
-- Minimum 1 TB storage
+- Minimum 16 GB RAM (minimum 8 GB with slightly modified parameters)
+- Minimum 1 TB storage (minimum 150 GB with slightly modified parameters)
 
 ### Knowledge
 
