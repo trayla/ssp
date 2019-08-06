@@ -37,6 +37,7 @@
       table: nat
       chain: PREROUTING
       protocol: tcp
+      destination: '{{ ansible_default_ipv4.address }}'
       destination_port: '443'
       jump: DNAT
       to_destination: '{{ hostvars.kubemaster.ansible_host }}:{{ traefik_port_https.stdout }}'
