@@ -9,4 +9,4 @@
 
 # Include firewall settings
 - name: Include the Kubernetes firewall settings
-    import_playbook: kubernetes-firewall.yaml
+  import_playbook: kubernetes-firewall.yaml
