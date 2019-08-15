@@ -1,4 +1,4 @@
-- hosts: gluster
+- hosts: kubernetes
   become: yes
   tasks:
   - name: Add IP address of all hosts to all hosts
@@ -8,4 +8,4 @@
       line: "{{ hostvars[item].ansible_host }} {{item}}"
       state: present
     when: hostvars[item].ansible_host is defined
-    with_items: "{{ groups.gluster }}"
+    with_items: "{{ groups.kubernetes }}"

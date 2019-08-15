@@ -1,0 +1,50 @@
+- hosts: kubenodes
+  become: yes
+  tasks:
+
+    - name: Install some LVM specific kernel modules
+      shell: |
+        echo "dm_snapshot" >> /etc/modules
+        echo "dm_mirror" >> /etc/modules
+        echo "dm_thin_pool" >> /etc/modules
+        echo "dm_snapshot" >> /etc/initramfs-tools/modules
+        echo "dm_mirror" >> /etc/initramfs-tools/modules
+        echo "dm_thin_pool" >> /etc/initramfs-tools/modules
+
+    - name: Activate LVM specific kernel modules immediately
+      shell: "modprobe dm_snapshot && modprobe dm_mirror && modprobe dm_thin_pool"
+
+    - name: install GPG
+      apt:
+        name: gnupg
+        state: present
+
+    - name: Add an Apt signing key, will not download if present
+      apt_key:
+        url: https://download.gluster.org/pub/gluster/glusterfs/6/rsa.pub
+        state: present
+    
+    - name: Add the Gluster Apt repository
+      apt_repository:
+        repo: 'ppa:gluster/glusterfs-6'
+
+    - name: Install GlusterFS server
+      apt:
+        name: glusterfs-server
+        state: present
+        update_cache: true
+
+- hosts: kubenode0
+  become: yes
+  tasks:
+
+    - name: Introduce the other cluster nodes
+      command: gluster peer probe {{ item }}
+      with_items: "{{ groups.kubenodes }}"
+
+- hosts: host
+  become: yes
+  tasks:
+
+  - name: Deploy the static Gluster service inside the Kubernetes cluster
+    shell: "kubectl create -f /opt/mgmt/ssp/kubernetes/gluster-static-service.yaml"

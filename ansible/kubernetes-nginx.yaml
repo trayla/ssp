@@ -1,0 +1,40 @@
+- hosts: host
+  become: yes
+  tasks:
+
+  # Install the NGINX web proxy via it's officially supported Helm package
+
+  - name: Install prerequisites of the NGINX ingress
+    shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.24.0/deploy/mandatory.yaml
+
+  - name: Install the NGINX Helm package
+    shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.24.0/deploy/provider/baremetal/service-nodeport.yaml
+
+  # Install Cert Manager
+
+  - name: Create the Kubernetes namespace for the Cert Manager
+    shell: kubectl create namespace cert-manager
+
+  - name: Install custom ressource definitions
+    shell: kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.9/deploy/manifests/00-crds.yaml
+
+  - name: Disable the automatic validation feature on the Cert Manager namespace
+    shell: kubectl label namespace cert-manager certmanager.k8s.io/disable-validation="true"
+
+  - name: Create the Cert Manager cluster issuer
+    shell: kubectl create -f /opt/mgmt/ssp/kubernetes/apps/nginx/clusterissuer-letsencrypt-staging.yaml
+
+  - name: Add the Jetstack Helm repository
+    shell: helm repo add jetstack https://charts.jetstack.io
+
+  - name: Install the Cert Manager via it's Helm package
+    shell: helm install --name certmanager --namespace cert-manager jetstack/cert-manager --set ingressShim.defaultIssuerKind=ClusterIssuer,ingressShim.defaultIssuerName=letsencrypt-staging,ingressShim.defaultACMEChallengeType=http01
+
+  # Deploy the Echo service
+
+  - name: Deploy the echo app
+    shell: kubectl create -f /opt/mgmt/ssp/kubernetes/apps/nginx/echo.yaml
+
+# Include firewall settings
+- name: Include the Kubernetes firewall settings
+  import_playbook: kubernetes-firewall.yaml

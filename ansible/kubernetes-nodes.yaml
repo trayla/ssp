@@ -46,4 +46,4 @@
         line: "{{ hostvars[item].ansible_host }} {{item}}"
         state: present
       when: hostvars[item].ansible_host is defined
-      with_items: "{{ groups.gluster }}"
+      with_items: "{{ groups.kubenodes }}"

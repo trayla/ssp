@@ -1,0 +1,12 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1beta1
+metadata:
+  name: default
+provisioner: kubernetes.io/glusterfs
+parameters:
+  resturl: "http://10.88.20.109:8080"
+  restuser: "admin"
+  secretName: "heketi-secret"
+  secretNamespace: "default"
+  volumetype: "replicate:3"
+  volumeoptions: user.heketi.arbiter true, user.heketi.average-file-size 1024

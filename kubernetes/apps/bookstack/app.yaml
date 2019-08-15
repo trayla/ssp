@@ -42,7 +42,7 @@ spec:
           - name: DB_PASSWORD
             value: "secret"
           - name: APP_URL
-            value: "https://wiki.trayla.com"
+            value: "https://bookstack.trayla.net"
         volumeMounts:
           - name: data
             mountPath: /config       
@@ -51,7 +51,5 @@ spec:
           containerPort: 80
       volumes:
         - name: data
-          glusterfs:
-            endpoints: gluster
-            path: bookstack-data
-            readOnly: false
+          persistentVolumeClaim:
+            claimName: bookstack-p

@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  labels:
+    name: gluster-client
+  name: gluster-client
+spec:
+  selector:
+    matchLabels:
+      name: gluster-client
+  template:
+    metadata:
+      labels:
+        name: gluster-client
+    spec:
+      containers:
+      - name: gluster
+        image: gluster/gluster-centos
+        livenessProbe:
+          exec:
+            command:
+            - "/bin/bash"
+            - "-c"
+            - systemctl status glusterd.service
+        readinessProbe:
+          exec:
+            command:
+            - "/bin/bash"
+            - "-c"
+            - systemctl status glusterd.service
+        securityContext:
+          privileged: true
+
