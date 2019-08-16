@@ -187,38 +187,26 @@ or by connection to the virtual machine over SSH (password is "pw")
 ssh sysadm@<ipaddr>
 ```
 
-#### gluster0
-
-Purpose: Arbiter node of the Gluster storage cluster
-
-IP Address: 10.88.20.110
-
-#### gluster1
-
-Purpose: First data node of the Gluster storage cluster
-
-IP Address: 10.88.20.111
-
-#### gluster2
-
-Purpose: Second data node of the Gluster storage cluster
-
-IP Address: 10.88.20.112
-
 #### kubemaster
 
 Purpose: Kubernetes master
 
-IP Address: 10.88.20.120
+IP Address: 10.88.20.109
+
+#### kubenode0
+
+Purpose: Kubernetes worker node with storage arbiter
+
+IP Address: 10.88.20.110
 
 #### kubenode1
 
-Purpose: First Kubernetes worker node
+Purpose: First Kubernetes worker node with data storage leg 1
 
-IP Address: 10.88.20.121
+IP Address: 10.88.20.111
 
 #### kubenode2
 
-Purpose: Second Kubernetes worker node
+Purpose: Second Kubernetes worker node with data storage leg 2
 
-IP Address: 10.88.20.122
+IP Address: 10.88.20.112
