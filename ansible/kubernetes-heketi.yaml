@@ -268,10 +268,10 @@
   tasks:
 
   - name: Deploy the Gluster daemon set inside the Kubernetes cluster
-    shell: "kubectl create -f /opt/mgmt/ssp/kubernetes/gluster-dynamic-daemonset.yaml"
+    shell: "kubectl create -f /opt/mgmt/ssp/kubernetes/gluster/dynamic-daemonset.yaml"
 
   - name: Deploy the Heketi password as a Kubernetes secret
-    shell: "kubectl create -f /opt/mgmt/ssp/kubernetes/gluster-dynamic-secret.yaml"
+    shell: "kubectl create -f /opt/mgmt/ssp/kubernetes/gluster/dynamic-secret.yaml"
 
   - name: Deploy the default storage class inside the Kubernetes cluster
-    shell: "kubectl create -f /opt/mgmt/ssp/kubernetes/gluster-dynamic-storageclass.yaml"
+    shell: "kubectl create -f /opt/mgmt/ssp/kubernetes/gluster/dynamic-storageclass.yaml"

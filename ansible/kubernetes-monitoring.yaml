@@ -1,0 +1,25 @@
+- hosts: host
+  become: yes
+  tasks:
+
+  - name: Create the monitoring namespace
+    shell: kubectl create -f /opt/mgmt/ssp/kubernetes/monitoring/namespace.yaml
+
+  # Install Prometheus
+
+  - name: Update the Helm repository
+    shell: helm repo update
+
+  - name: Install Prometheus
+    shell: helm install stable/prometheus --namespace ssp-monitoring --name prometheus
+
+  # Install Grafana
+
+  - name: Deploy the Grafana config map for the Prometheus datasource
+    shell: kubectl create -f /opt/mgmt/ssp/kubernetes/monitoring/grafana/config.yaml
+
+  - name: Install Grafana
+    shell: helm install stable/grafana -f /opt/mgmt/ssp/kubernetes/monitoring/grafana/values.yaml --namespace ssp-monitoring --name grafana
+
+  - name: Deploy the Grafana Ingress
+    shell: kubectl create -f /opt/mgmt/ssp/kubernetes/monitoring/grafana/ingress.yaml

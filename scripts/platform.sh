@@ -171,6 +171,9 @@ if [ "$1" == "install" ]; then
   # Install the Ingress based on NGINX
   ansible-playbook -i $BASEDIR/../ansible/inventory.yaml $BASEDIR/../ansible/kubernetes-nginx.yaml
 
+  # Install the monitoring solution
+  ansible-playbook -i $BASEDIR/../ansible/inventory.yaml $BASEDIR/../ansible/kubernetes-monitoring.yaml
+
 elif [ "$1" == "remove" ]; then
   virsh destroy kubemaster
   virsh undefine kubemaster
