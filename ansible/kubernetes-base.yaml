@@ -1,6 +1,27 @@
-- hosts: kubernetes
+- hosts: kubemaster
   become: yes
   tasks:
+
+  # Copy the Kubernetes client configuration on the Kubernetes master
+
+  - name: Copy Kubernetes configuration from the Kubernetes master to the local sysadm user
+    fetch:
+      src: /home/sysadm/.kube/config
+      dest: /home/sysadm/.kube/config
+      flat: yes
+
+  - name: Copy Kubernetes configuration from the Kubernetes master to the local root user
+    fetch:
+      src: /home/sysadm/.kube/config
+      dest: /root/.kube/config
+      flat: yes
+
+- hosts: host
+  become: yes
+  tasks:
+
+  # Disable Swap files because these are not supported on Docker hosts
+
   - name: Remove swapfile from /etc/fstab
     mount:
       path: none
@@ -11,11 +32,15 @@
     command: swapoff -a
     when: ansible_swaptotal_mb > 0
 
+  # Install Docker
+
   - name: Install Docker
     apt:
       name: docker.io
       state: present
       update_cache: true
+
+  # Install the Kubernetes management tools
 
   - name: Install GPG
     apt:
@@ -34,26 +59,84 @@
 
   - name: Add Kubernetes APT repository
     apt_repository:
-     repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
-     state: present
-     filename: 'kubernetes'
-
-  - name: Install kubelet
-    apt:
-      name: kubelet
+      repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
       state: present
-      update_cache: true
+      filename: 'kubernetes'
 
-  - name: Install kubeadm
+  - name: Install kubectl
     apt:
-      name: kubeadm
+      name: kubectl
       state: present
+      force: yes
 
-- hosts: kubemaster
-  become: yes
-  tasks:
-   - name: Install kubectl
-     apt:
-       name: kubectl
-       state: present
-       force: yes
+  - name: Configure Kubernetes shell autocompletion
+    become: yes
+    shell: kubectl completion bash > /etc/bash_completion.d/kubectl
+
+  # Install the Helm package manager along with the Tiller Companion inside the Kubernetes cluster
+
+  - name: Download the Helm package manager
+    get_url:
+      url: https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get
+      dest: /tmp/install-helm.sh
+      mode: '0755'
+
+  - name: Install Helm
+    shell: /tmp/install-helm.sh
+
+  - name: Create a service account for Tiller
+    shell: kubectl -n kube-system delete serviceaccounts tiller --ignore-not-found=true && kubectl -n kube-system create serviceaccount tiller
+
+  - name: Create a cluster role binding for Tiller
+    shell: kubectl -n kube-system delete clusterrolebinding tiller --ignore-not-found=true && kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+
+  - name: Initialize Helm and the Tiller companion inside the Kubernetes cluster
+    shell: helm init --service-account tiller
+    register: helm_init_result
+
+  - name: Show Helm init result
+    debug:
+      msg: "{{ helm_init_result.stdout_lines }}"
+
+  - name: Ensure that Tiller is running
+    shell: kubectl get pods --namespace kube-system -l name=tiller
+    register: kubectl_kube_system_pods
+    until: kubectl_kube_system_pods.stdout.find("Running") != -1
+    retries: 5
+    delay: 10
+
+  # Install the base components
+
+  - name: Create the base namespace
+    shell: kubectl create namespace ssp-base
+
+  # Install the private Docker Registry
+
+  - name: Deploy the Docker Registry
+    shell: kubectl create -f /opt/mgmt/ssp/kubernetes/dockerreg/app.yaml -f /opt/mgmt/ssp/kubernetes/dockerreg/pvc.yaml -f /opt/mgmt/ssp/kubernetes/dockerreg/service.yaml
+
+  - name: Deploy the Ingress
+    shell: |
+      cat <<EOF | kubectl create -f -
+      apiVersion: extensions/v1beta1
+      kind: Ingress
+      metadata:
+        namespace: ssp-base
+        name: dockerreg-p
+        annotations:
+          kubernetes.io/ingress.class: nginx
+          kubernetes.io/tls-acme: "true"
+      spec:
+        tls:
+        - hosts:
+          - dockerreg.ssp.{{ platform.domain }}
+          secretName: letsencrypt-staging
+        rules:
+        - host: dockerreg.ssp.{{ platform.domain }}
+          http:
+            paths:
+            - path: /
+              backend:
+                serviceName: dockerreg-p
+                servicePort: 5000
+      EOF

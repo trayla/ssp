@@ -1,0 +1,40 @@
+- hosts: host
+  become: yes
+  tasks:
+
+  # Install Weave Scope
+
+  - name: Create the weave namespace
+    shell: kubectl create -f /opt/mgmt/ssp/kubernetes/weave/ns.yaml
+
+  - name: Install Weave cluster permissions
+    shell: kubectl create -f /opt/mgmt/ssp/kubernetes/weave/sa.yaml -f /opt/mgmt/ssp/kubernetes/weave/cluster-role.yaml -f /opt/mgmt/ssp/kubernetes/weave/cluster-role-binding.yaml
+
+  - name: Install Weave services
+    shell: kubectl create -f /opt/mgmt/ssp/kubernetes/weave/deploy.yaml -f /opt/mgmt/ssp/kubernetes/weave/ds.yaml -f /opt/mgmt/ssp/kubernetes/weave/svc.yaml -f /opt/mgmt/ssp/kubernetes/weave/probe-deploy.yaml -f /opt/mgmt/ssp/kubernetes/weave/psp.yaml
+
+  - name: Deploy the Ingress
+    shell: |
+      cat <<EOF | kubectl create -f -
+      apiVersion: extensions/v1beta1
+      kind: Ingress
+      metadata:
+        namespace: weave
+        name: weave
+        annotations:
+          kubernetes.io/ingress.class: nginx
+          kubernetes.io/tls-acme: "true"
+      spec:
+        tls:
+        - hosts:
+          - weave.ssp.{{ platform.domain }}
+          secretName: letsencrypt-staging
+        rules:
+        - host: weave.ssp.{{ platform.domain }}
+          http:
+            paths:
+            - path: /
+              backend:
+                serviceName: weave-scope-app
+                servicePort: 80
+      EOF

@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: dockerreg
+  namespace: ssp-base
+  name: dockerreg-p
   labels:
     app: dockerreg
     env: p
 spec:
-  type: NodePort
-  clusterIP: 10.96.10.1
+  type: ClusterIP
   ports:
   - name: http
     port: 5000

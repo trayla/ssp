@@ -210,7 +210,10 @@
                     "zone": 1
                   },
                   "devices": [
-                    "/dev/vdb"
+                    "/dev/vdb",
+                    "/dev/vdc",
+                    "/dev/vdd",
+                    "/dev/vde"
                   ]
                 },
                 {
@@ -226,7 +229,10 @@
                     "zone": 1
                   },
                   "devices": [
-                    "/dev/vdb"
+                    "/dev/vdb",
+                    "/dev/vdc",
+                    "/dev/vdd",
+                    "/dev/vde"
                   ]
                 }
               ]

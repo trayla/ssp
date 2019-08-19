@@ -1,6 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: ssp-base
   name: dockerreg
 spec:
   selector:
@@ -25,7 +26,5 @@ spec:
           containerPort: 5000
       volumes:
       - name: data
-        glusterfs:
-          endpoints: gluster
-          path: default-dockerreg
-          readOnly: false
+        persistentVolumeClaim:
+            claimName: dockerreg-p

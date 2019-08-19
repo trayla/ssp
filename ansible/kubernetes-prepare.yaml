@@ -1,0 +1,67 @@
+- hosts: kubernetes
+  become: yes
+  tasks:
+
+  # Prepare all Kubernetes nodes for installation
+
+  - name: Remove swapfile from /etc/fstab
+    mount:
+      path: none
+      fstype: swap
+      state: absent
+
+  - name: Disable swap
+    command: swapoff -a
+    when: ansible_swaptotal_mb > 0
+
+  - name: Install Docker
+    apt:
+      name: docker.io
+      state: present
+      update_cache: true
+
+  - name: Install GPG
+    apt:
+      name: gnupg
+      state: present
+
+  - name: Install APT Transport HTTPS
+    apt:
+      name: apt-transport-https
+      state: present
+
+  - name: Add Kubernetes apt-key
+    apt_key:
+      url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+      state: present
+
+  - name: Add Kubernetes APT repository
+    apt_repository:
+     repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+     state: present
+     filename: 'kubernetes'
+
+  # Install Kubernetes
+
+  - name: Install kubelet
+    apt:
+      name: kubelet
+      state: present
+      update_cache: true
+
+  - name: Install kubeadm
+    apt:
+      name: kubeadm
+      state: present
+
+- hosts: kubemaster
+  become: yes
+  tasks:
+
+  # Install the Kuberenetes command line on the master node
+
+  - name: Install kubectl
+    apt:
+      name: kubectl
+      state: present
+      force: yes

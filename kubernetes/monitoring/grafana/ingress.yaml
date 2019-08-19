@@ -9,10 +9,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - grafana.trayla.org
+    - grafana.ssp.{{ platform.domain }}
     secretName: letsencrypt-staging
   rules:
-  - host: grafana.trayla.org
+  - host: grafana.ssp.{{ platform.domain }}
     http:
       paths:
       - path: /
