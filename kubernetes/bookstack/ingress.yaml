@@ -9,10 +9,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - bookstack.trayla.net
+    - bookstack.trayla.org
     secretName: letsencrypt-staging
   rules:
-  - host: bookstack.trayla.net
+  - host: bookstack.trayla.org
     http:
       paths:
       - path: /

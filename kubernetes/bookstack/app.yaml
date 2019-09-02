@@ -42,7 +42,7 @@ spec:
           - name: DB_PASSWORD
             value: "secret"
           - name: APP_URL
-            value: "https://bookstack.trayla.net"
+            value: "https://bookstack.trayla.org"
         volumeMounts:
           - name: data
             mountPath: /config       

@@ -1,4 +1,6 @@
 - hosts: host
+  vars_files:
+  - /opt/mgmt/values.yaml
   become: yes
   tasks:
   - name: Deny incoming traffic by default
@@ -18,7 +20,7 @@
 
   - name: Install necessary packages
     apt:
-      name: xfsprogs,qemu-kvm,libvirt-clients,libvirt-daemon-system,bridge-utils,virt-manager,libguestfs-tools,virt-top,sysstat,apt-transport-https,ca-certificates,curl,software-properties-common,python-lxml,python-pip
+      name: xfsprogs,qemu-kvm,libvirt-clients,libvirt-daemon-system,bridge-utils,virt-manager,libguestfs-tools,virt-top,sysstat,apt-transport-https,ca-certificates,curl,software-properties-common,python-lxml,python-pip,apache2-utils
       state: present
       update_cache: true
 

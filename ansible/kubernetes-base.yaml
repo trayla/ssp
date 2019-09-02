@@ -1,5 +1,7 @@
 - hosts: kubemaster
   become: yes
+  vars_files:
+  - /opt/mgmt/values.yaml
   tasks:
 
   # Copy the Kubernetes client configuration on the Kubernetes master
@@ -109,34 +111,3 @@
 
   - name: Create the base namespace
     shell: kubectl create namespace ssp-base
-
-  # Install the private Docker Registry
-
-  - name: Deploy the Docker Registry
-    shell: kubectl create -f /opt/mgmt/ssp/kubernetes/dockerreg/app.yaml -f /opt/mgmt/ssp/kubernetes/dockerreg/pvc.yaml -f /opt/mgmt/ssp/kubernetes/dockerreg/service.yaml
-
-  - name: Deploy the Ingress
-    shell: |
-      cat <<EOF | kubectl create -f -
-      apiVersion: extensions/v1beta1
-      kind: Ingress
-      metadata:
-        namespace: ssp-base
-        name: dockerreg-p
-        annotations:
-          kubernetes.io/ingress.class: nginx
-          kubernetes.io/tls-acme: "true"
-      spec:
-        tls:
-        - hosts:
-          - dockerreg.ssp.{{ platform.domain }}
-          secretName: letsencrypt-staging
-        rules:
-        - host: dockerreg.ssp.{{ platform.domain }}
-          http:
-            paths:
-            - path: /
-              backend:
-                serviceName: dockerreg-p
-                servicePort: 5000
-      EOF

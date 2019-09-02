@@ -1,5 +1,7 @@
 - hosts: kubernetes
   become: yes
+  vars_files:
+  - /opt/mgmt/values.yaml
   tasks:
   - name: Add IP address of all hosts to all hosts
     lineinfile:

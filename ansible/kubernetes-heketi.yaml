@@ -1,5 +1,7 @@
 - hosts: kubenodes
   become: yes
+  vars_files:
+  - /opt/mgmt/values.yaml
   tasks:
 
   - name: Install Thin Provisioning tools on all Kubernetes nodes
@@ -191,7 +193,10 @@
                         "10.88.20.110"
                       ]
                     },
-                    "zone": 1
+                    "zone": 1,
+                    "tags": {
+                      "arbiter": "required"
+                    }
                   },
                   "devices": [
                     "/dev/vdb"
@@ -207,7 +212,10 @@
                         "10.88.20.111"
                       ]
                     },
-                    "zone": 1
+                    "zone": 1,
+                    "tags": {
+                      "arbiter": "disabled" 
+                    }
                   },
                   "devices": [
                     "/dev/vdb",
@@ -226,7 +234,10 @@
                         "10.88.20.112"
                       ]
                     },
-                    "zone": 1
+                    "zone": 1,
+                    "tags": {
+                      "arbiter": "disabled" 
+                    }
                   },
                   "devices": [
                     "/dev/vdb",

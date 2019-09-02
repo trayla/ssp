@@ -1,5 +1,7 @@
 - hosts: host
   become: yes
+  vars_files:
+  - /opt/mgmt/values.yaml
   tasks:
 
   # Install the NGINX web proxy via it's officially supported Helm package
@@ -65,12 +67,16 @@
 
   # Deploy the Echo service
 
-  - name: Deploy the echo app
+  - name: Create an authorization secret for the Echo app
+    shell: htpasswd -b -c /tmp/auth admin {{ platform.admin.password }} && kubectl -n ssp-base create secret generic basic-auth --from-file=/tmp/auth && rm /tmp/auth
+
+  - name: Deploy the Echo app
     shell: |
       cat <<EOF | kubectl create -f -
       apiVersion: apps/v1
       kind: Deployment
       metadata:
+        namespace: ssp-base
         name: echo
       spec:
         selector:
@@ -86,13 +92,14 @@
             - name: echo
               image: hashicorp/http-echo
               args:
-              - "-text=echo"
+              - "-text=You made it!"
               ports:
               - containerPort: 5678
       ---
       apiVersion: v1
       kind: Service
       metadata:
+        namespace: ssp-base
         name: echo
       spec:
         ports:
@@ -104,17 +111,21 @@
       apiVersion: extensions/v1beta1
       kind: Ingress
       metadata:
-        name: echo-ingress
+        namespace: ssp-base
+        name: echo
         annotations:  
           kubernetes.io/ingress.class: nginx
           kubernetes.io/tls-acme: "true"
+          nginx.ingress.kubernetes.io/auth-type: basic
+          nginx.ingress.kubernetes.io/auth-secret: basic-auth
+          nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
       spec:
         tls:
         - hosts:
-          - {{ platform.domain }}
-          secretName: letsencrypt-staging
+          - echo.ssp.{{ platform.domain }}
+          secretName: echo-tls
         rules:
-        - host: echo.{{ platform.domain }}
+        - host: echo.ssp.{{ platform.domain }}
           http:
             paths:
             - backend:
@@ -122,6 +133,18 @@
                 servicePort: 80
       EOF
 
-# Include firewall settings
-- name: Include the Kubernetes firewall settings
-  import_playbook: kubernetes-firewall.yaml
+# Trust the Let's Encrypt staging CA on all nodes
+- hosts: all
+  become: yes
+  tasks:
+
+  # Download the Let's Encrypt staging certificate to each Kubernetes node
+  - name: Download the Let's Encrypt staging certificate to each Kubernetes node
+    get_url:
+      url: https://letsencrypt.org/certs/fakelerootx1.pem
+      dest: /etc/ssl/certs/fakelerootx1.pem
+      mode: '0666'
+
+  # Refresh the trusted authorities
+  - name: Register the trusted authorities
+    shell: update-ca-certificates --fresh

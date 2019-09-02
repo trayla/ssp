@@ -1,5 +1,7 @@
 - hosts: kubenodes
   become: yes
+  vars_files:
+  - /opt/mgmt/values.yaml
   tasks:
 
     - name: Install some LVM specific kernel modules

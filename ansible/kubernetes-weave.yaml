@@ -1,5 +1,7 @@
 - hosts: host
   become: yes
+  vars_files:
+  - /opt/mgmt/values.yaml
   tasks:
 
   # Install Weave Scope
@@ -28,7 +30,7 @@
         tls:
         - hosts:
           - weave.ssp.{{ platform.domain }}
-          secretName: letsencrypt-staging
+          secretName: weave-tls
         rules:
         - host: weave.ssp.{{ platform.domain }}
           http:

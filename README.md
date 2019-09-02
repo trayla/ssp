@@ -128,13 +128,18 @@ usermod -aG sudo sysadm
 passwd -l root
 ```
 
-#### Installed scripts
+#### Install scripts
 
 In order to execute the scripts you have to clone this GitHub repository to your server into the directory /opt/mgmt/ssp-base by issuing the following commands:
 ```ShellSession
 mkdir -p /opt/mgmt/ssp
 git clone https://github.com/trayla/ssp.git /opt/mgmt/ssp
 chown -R sysadm:sysadm /opt/mgmt
+```
+
+The values file defines specific customizations of your own topology. A sample file is included in this repository. It should be copied to /opt/mgmt and customized before further installation.
+```ShellSession
+cp /opt/mgmt/ssp/values-default.yaml /opt/mgmt/values.yaml
 ```
 
 #### Domain

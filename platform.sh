@@ -135,7 +135,7 @@ if [ "$1" == "install" ]; then
   # Install Heketi, the storage API for GlusterFS
   ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/kubernetes-heketi.yaml
 
-  # Install the Ingress based on NGINX
+  # Install the Ingress based on Nginx
   ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/kubernetes-nginx.yaml
 
   # Install the monitoring solution
@@ -143,6 +143,14 @@ if [ "$1" == "install" ]; then
 
   # Install Weave
   ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/kubernetes-weave.yaml
+
+  # Install the Docker Registry
+  ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/kubernetes-dockerreg.yaml
+
+  # Deploy custom namespaces
+  ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/kubernetes-customns.yaml
+
+  reboot
 
 elif [ "$1" == "remove" ]; then
   virsh destroy kubemaster
@@ -160,6 +168,8 @@ elif [ "$1" == "remove" ]; then
   rm /vmpool/kube*
   rm /data1/kube*
   rm /data2/kube*
+
+  reboot
 
 elif [ "$1" == "add-disk" ]; then
   add_disk 1 $2

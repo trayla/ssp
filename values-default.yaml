@@ -1,0 +1,18 @@
+platform:
+
+  # Your domain, the platform should be reachable through
+  domain: example.com
+
+  # The default Email address to be used by the platform
+  email: support@example.com
+
+  # The default administration user account
+  admin:
+    password: pw%ssp
+
+custom:
+
+  # Custom Kubernetes namespaces to be created upon installation 
+  namespaces:
+    # - name: my-namespace1
+    # - name: my-namespace2
