@@ -148,22 +148,12 @@ The Single Server Platform provides a lot of services to the outside world. In o
 
 ## Usage
 
-Call the setup stages from a root context with the following commands.
-
-Initialize the host setup by the following command. This installs and configures the KVM virtualization engine along with Ansible and the host firewall:
+Install the platform with the following command:
 ```ShellSession
-/opt/mgmt/ssp/host.sh prepare
+sudo /opt/mgmt/ssp/platform.sh install
 ```
 
-Setting up the Gluster based storage cluster with the following command:
-```ShellSession
-/opt/mgmt/ssp/gluster.sh install
-```
-
-Setting up the Kubernetes cluster with the following command:
-```ShellSession
-/opt/mgmt/ssp/kubernetes.sh install
-```
+After completion the system will be restarted. It takes a couple of until all virtual machines and services are up an running.
 
 ## Result
 
