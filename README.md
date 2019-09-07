@@ -148,9 +148,19 @@ The Single Server Platform provides a lot of services to the outside world. In o
 
 ## Usage
 
+Prepare your host with the following command. This is necessary only once while you can install and remove the platform from your host as much as you like. During this process you have to accept the licence agreement of the Ansible product suite.
+```ShellSession
+sudo /opt/mgmt/ssp/platform.sh prepare
+```
+
 Install the platform with the following command:
 ```ShellSession
 sudo /opt/mgmt/ssp/platform.sh install
+```
+
+This command removes the whole plattform from your host:
+```ShellSession
+sudo /opt/mgmt/ssp/platform.sh remove
 ```
 
 After completion the system will be restarted. It takes a couple of until all virtual machines and services are up an running.

@@ -99,7 +99,28 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
-if [ "$1" == "install" ]; then
+if [ "$1" == "prepare" ]; then
+  # Install aptitude which is necessary for Ansible
+  apt install aptitude -y
+
+  # Install the latest version of Ansible from the PPA repository
+  apt-add-repository ppa:ansible/ansible
+  apt update
+  apt install ansible -y
+
+  # Create SSH key pair for the root user
+  ssh-keygen -f /root/.ssh/id_rsa -N ""
+  cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
+
+  # Create SSH key pair for the sysadm user
+  mkdir -p /home/sysadm/.ssh
+  ssh-keygen -f /home/sysadm/.ssh/id_rsa -N ""
+  chown -R sysadm:sysadm /home/sysadm/.ssh
+
+  # Create the LVM
+  ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/host-prepare.yaml
+
+elif [ "$1" == "install" ]; then
   # Create the Kubernetes master
   $BASEDIR/scripts/deploy-vm.sh kubemaster 2048 4 20G pw $KUBEMASTER_IPADDR
   ssh-keygen -f "/root/.ssh/known_hosts" -R $KUBEMASTER_IPADDR
@@ -194,6 +215,7 @@ elif [ "$1" == "remove-volume" ]; then
 else
   echo "Deploys a Kubernetes cluster"
   echo "Usage:"
+  echo "  platform.sh prepare"
   echo "  platform.sh install"
   echo "  platform.sh add-disk vd[c-z]"
   echo "  platform.sh create-volume <namespace> <volname>"
