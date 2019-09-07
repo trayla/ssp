@@ -100,13 +100,6 @@ if [ "$EUID" -ne 0 ]
 fi
 
 if [ "$1" == "install" ]; then
-  apt install -y libguestfs-tools software-properties-common
-  
-  # Install Ansible
-  apt-add-repository ppa:ansible/ansible
-  apt update
-  apt install ansible
-  
   # Create the Kubernetes master
   $BASEDIR/scripts/deploy-vm.sh kubemaster 2048 4 20G pw $KUBEMASTER_IPADDR
   ssh-keygen -f "/root/.ssh/known_hosts" -R $KUBEMASTER_IPADDR
