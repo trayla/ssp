@@ -1,7 +1,7 @@
 - hosts: host
   become: yes
   vars_files:
-  - /opt/mgmt/values.yaml
+  - /opt/mgmt/values-ssp.yaml
   tasks:
 
   # Deploy the Docker Registry
@@ -52,7 +52,7 @@
       spec:
         resources:
           requests:
-            storage: 2Gi
+            storage: 30Gi
         accessModes:
           - ReadWriteMany
         storageClassName: default

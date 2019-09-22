@@ -1,6 +1,6 @@
 - hosts: host
   vars_files:
-  - /opt/mgmt/values.yaml
+  - /opt/mgmt/values-ssp.yaml
   become: yes
   tasks:
   - name: Deny incoming traffic by default

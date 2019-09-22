@@ -1,13 +1,14 @@
 - hosts: kubernetes
   become: yes
   vars_files:
-  - /opt/mgmt/values.yaml
+    - /opt/mgmt/values-ssp.yaml
   tasks:
-  - name: Add IP address of all hosts to all hosts
-    lineinfile:
-      dest: /etc/hosts
-      regexp: '.*{{ item }}$'
-      line: "{{ hostvars[item].ansible_host }} {{item}}"
-      state: present
-    when: hostvars[item].ansible_host is defined
-    with_items: "{{ groups.kubernetes }}"
+
+    - name: Add IP address of all hosts to all hosts
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '.*{{ item }}$'
+        line: "{{ hostvars[item].ansible_host }} {{item}}"
+        state: present
+      when: hostvars[item].ansible_host is defined
+      with_items: "{{ groups.kubernetes }}"

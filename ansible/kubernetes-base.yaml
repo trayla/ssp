@@ -1,7 +1,7 @@
 - hosts: kubemaster
   become: yes
   vars_files:
-  - /opt/mgmt/values.yaml
+  - /opt/mgmt/values-ssp.yaml
   tasks:
 
   # Copy the Kubernetes client configuration on the Kubernetes master
@@ -67,7 +67,7 @@
 
   - name: Install kubectl
     apt:
-      name: kubectl
+      name: kubectl=1.15.2-00
       state: present
       force: yes
 

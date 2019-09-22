@@ -1,7 +1,7 @@
 - hosts: kubernetes
   become: yes
   vars_files:
-  - /opt/mgmt/values.yaml
+  - /opt/mgmt/values-ssp.yaml
   tasks:
 
   # Prepare all Kubernetes nodes for installation
@@ -47,25 +47,11 @@
 
   - name: Install kubelet
     apt:
-      name: kubelet
+      name: kubelet=1.15.2-00
       state: present
       update_cache: true
 
   - name: Install kubeadm
     apt:
-      name: kubeadm
+      name: kubeadm=1.15.2-00
       state: present
-
-- hosts: kubemaster
-  become: yes
-  vars_files:
-  - /opt/mgmt/values.yaml
-  tasks:
-
-  # Install the Kuberenetes command line on the master node
-
-  - name: Install kubectl
-    apt:
-      name: kubectl
-      state: present
-      force: yes

@@ -2,7 +2,7 @@
   become: yes
   gather_facts: false
   vars_files:
-  - /opt/mgmt/values.yaml
+  - /opt/mgmt/values-ssp.yaml
   tasks:
     - name: Get join command
       shell: kubeadm token create --print-join-command
