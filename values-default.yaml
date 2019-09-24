@@ -1,5 +1,8 @@
 platform:
 
+  # The storage layout you would like to use which is either 1disk or 3disk
+  storagelayout: 1disk
+
   # Your domain, the platform should be reachable through
   domain: example.com
 
@@ -9,6 +12,10 @@ platform:
   # The default administration user account
   admin:
     password: pw%ssp
+
+  # The worker nodes configuration
+  workers:
+    ram: 4096
 
 custom:
 

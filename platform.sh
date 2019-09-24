@@ -4,7 +4,9 @@ BASEDIR=$(dirname "$0")
 
 KUBEMASTER_IPADDR="10.88.20.109"
 
-STORAGELAYOUT=`$BASEDIR/python/read-values.py`
+STORAGELAYOUT=`$BASEDIR/python/read-value-storagelayout.py`
+WORKERSRAM=`$BASEDIR/python/read-value-workersram.py`
+ADMINPASSWORD=`$BASEDIR/python/read-value-adminpassword.py`
 
 function attach_arbiterdisk () {
   VM=kubenode$1
@@ -52,7 +54,7 @@ function create_datanode () {
   IPADDR=10.88.20.$2
 
   # Create the virtual machine
-  $BASEDIR/scripts/deploy-vm.sh kubenode$1 4096 2 20G pw $IPADDR
+  $BASEDIR/scripts/deploy-vm.sh kubenode$1 $WORKERSRAM 4 30G pw $IPADDR
 
   # Reset locally cached SSH keys for the new virtual machine
   ssh-keygen -f "/root/.ssh/known_hosts" -R $IPADDR
@@ -72,7 +74,7 @@ function create_arbiternode () {
   IPADDR=10.88.20.$2
 
   # Create the virtual machine
-  $BASEDIR/scripts/deploy-vm.sh kubenode$1 1024 2 20G pw $IPADDR
+  $BASEDIR/scripts/deploy-vm.sh kubenode$1 1536 4 30G pw $IPADDR
 
   # Reset locally cached SSH keys for the new virtual machine
   ssh-keygen -f "/root/.ssh/known_hosts" -R $IPADDR
