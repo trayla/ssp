@@ -1,0 +1,13 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: default
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: kubernetes.io/glusterfs
+parameters:
+  resturl: http://10.88.20.109:8080
+  restuser: admin
+  secretName: heketi-secret
+  secretNamespace: default
+  volumetype: none

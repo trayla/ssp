@@ -1,7 +1,7 @@
 - hosts: kubenodes
   become: yes
   vars_files:
-  - /opt/mgmt/values-ssp.yaml
+    - /opt/mgmt/values-ssp.yaml
   tasks:
 
   - name: Install Thin Provisioning tools on all Kubernetes nodes
@@ -11,6 +11,8 @@
 
 - hosts: kubemaster
   become: yes
+  vars_files:
+    - /opt/mgmt/values-ssp.yaml
   tasks:
 
   - name: Create the Heketi group
@@ -175,9 +177,61 @@
       enabled: yes
       daemon_reload: yes
 
-  - name: Create the Heketi topology definition
+  - name: Create the Heketi 1 disk topology definition
     copy:
-      dest: /etc/heketi/topology.json
+      dest: /etc/heketi/topology-1disk.json
+      content: |
+        {
+          "clusters": [
+            {
+              "nodes": [
+                {
+                  "node": {
+                    "hostnames": {
+                      "manage": [
+                        "kubenode1"
+                      ],
+                      "storage": [
+                        "10.88.20.111"
+                      ]
+                    },
+                    "zone": 1
+                  },
+                  "devices": [
+                    "/dev/vdb",
+                    "/dev/vdc",
+                    "/dev/vdd",
+                    "/dev/vde"
+                  ]
+                },
+                {
+                  "node": {
+                    "hostnames": {
+                      "manage": [
+                        "kubenode2"
+                      ],
+                      "storage": [
+                        "10.88.20.112"
+                      ]
+                    },
+                    "zone": 1
+                  },
+                  "devices": [
+                    "/dev/vdb",
+                    "/dev/vdc",
+                    "/dev/vdd",
+                    "/dev/vde"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+
+
+  - name: Create the Heketi 3 disk topology definition
+    copy:
+      dest: /etc/heketi/topology-3disk.json
       content: |
         {
           "clusters": [
@@ -253,6 +307,8 @@
 
 - hosts: kubenodes
   become: yes
+  vars_files:
+    - /opt/mgmt/values-ssp.yaml
   tasks:
 
   - shell: "echo '{{ hostvars['kubemaster']['heketi_rsa_key_pub'].stdout }}' > /tmp/key"
@@ -271,10 +327,12 @@
 
 - hosts: kubemaster
   become: yes
+  vars_files:
+    - /opt/mgmt/values-ssp.yaml
   tasks:
 
   - name: Initialize Heketi with the storage topology
-    shell: "/usr/local/bin/heketi-cli topology load --json=/etc/heketi/topology.json"
+    shell: "/usr/local/bin/heketi-cli topology load --json=/etc/heketi/topology-{{ platform.storagelayout }}.json"
     environment:
       HEKETI_CLI_SERVER: "http://10.88.20.109:8080"
       HEKETI_CLI_USER: "admin"
@@ -282,6 +340,8 @@
 
 - hosts: host
   become: yes
+  vars_files:
+    - /opt/mgmt/values-ssp.yaml
   tasks:
 
   - name: Deploy the Gluster daemon set inside the Kubernetes cluster
@@ -291,4 +351,4 @@
     shell: "kubectl create -f /opt/mgmt/ssp/kubernetes/gluster/dynamic-secret.yaml"
 
   - name: Deploy the default storage class inside the Kubernetes cluster
-    shell: "kubectl create -f /opt/mgmt/ssp/kubernetes/gluster/dynamic-storageclass.yaml"
+    shell: "kubectl create -f /opt/mgmt/ssp/kubernetes/gluster/dynamic-storageclass-{{ platform.storagelayout }}.yaml"

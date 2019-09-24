@@ -1,7 +1,7 @@
 - hosts: kubernetes
   become: yes
   vars_files:
-  - /opt/mgmt/values-ssp.yaml
+    - /opt/mgmt/values-ssp.yaml
   tasks:
 
   # Prepare all Kubernetes nodes for installation

@@ -1,7 +1,7 @@
 - hosts: host
   become: yes
   vars_files:
-  - /opt/mgmt/values-ssp.yaml
+    - /opt/mgmt/values-ssp.yaml
   tasks:
 
   # Wait for the Nginx service to come up
@@ -34,7 +34,7 @@
       destination: '{{ ansible_default_ipv4.address }}'
       destination_port: '80'
       jump: DNAT
-      to_destination: '{{ hostvars.kubenode0.ansible_host }}:{{ nginx_port_http.stdout }}'
+      to_destination: '{{ hostvars.kubenode1.ansible_host }}:{{ nginx_port_http.stdout }}'
 
   - name: Create port forwarding of https host port to node port {{ nginx_port_https.stdout }}
     iptables:
@@ -44,7 +44,7 @@
       destination: '{{ ansible_default_ipv4.address }}'
       destination_port: '443'
       jump: DNAT
-      to_destination: '{{ hostvars.kubenode0.ansible_host }}:{{ nginx_port_https.stdout }}'
+      to_destination: '{{ hostvars.kubenode1.ansible_host }}:{{ nginx_port_https.stdout }}'
 
   # Permit port forwarding even on localhost
 
@@ -56,7 +56,7 @@
       out_interface: lo
       destination_port: '80'
       jump: DNAT
-      to_destination: '{{ hostvars.kubenode0.ansible_host }}:{{ nginx_port_http.stdout }}'
+      to_destination: '{{ hostvars.kubenode1.ansible_host }}:{{ nginx_port_http.stdout }}'
 
   - name: Create port forwarding of https on localhost from host port to node port {{ nginx_port_https.stdout }}
     iptables:
@@ -66,7 +66,7 @@
       out_interface: lo
       destination_port: '443'
       jump: DNAT
-      to_destination: '{{ hostvars.kubenode0.ansible_host }}:{{ nginx_port_https.stdout }}'
+      to_destination: '{{ hostvars.kubenode1.ansible_host }}:{{ nginx_port_https.stdout }}'
 
   # Masquerade the Ingress headed HTTP and HTTPS traffic
 
@@ -76,7 +76,7 @@
       chain: POSTROUTING
       protocol: tcp
       source: 10.88.20.0/24
-      destination: '{{ hostvars.kubenode0.ansible_host }}/32'
+      destination: '{{ hostvars.kubenode1.ansible_host }}/32'
       match: multiport
       jump: MASQUERADE
       destination_port: '{{ nginx_port_http.stdout }},{{ nginx_port_https.stdout }}'

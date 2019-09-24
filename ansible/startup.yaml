@@ -1,5 +1,7 @@
 - hosts: host
   become: yes
+  vars_files:
+    - /opt/mgmt/values-ssp.yaml
   tasks:
 
   # Wait some time to let the KVM service be started
@@ -13,7 +15,7 @@
     with_items: "{{ groups.all }}"
 
   # Wait for the Kubernetes cluster to come up
-  - name: Wait for the Traefik service to come up
+  - name: Wait for the Kubernetes cluster to come up
     shell: kubectl cluster-info
     register: result
     until: result.stdout.find("running") != -1

@@ -1,7 +1,7 @@
 - hosts: kubenodes
   become: yes
   vars_files:
-  - /opt/mgmt/values-ssp.yaml
+    - /opt/mgmt/values-ssp.yaml
   tasks:
 
     - name: Install some LVM specific kernel modules
@@ -36,8 +36,10 @@
         state: present
         update_cache: true
 
-- hosts: kubenode0
+- hosts: kubenode1
   become: yes
+  vars_files:
+    - /opt/mgmt/values-ssp.yaml
   tasks:
 
     - name: Introduce the other cluster nodes
@@ -46,6 +48,8 @@
 
 - hosts: host
   become: yes
+  vars_files:
+    - /opt/mgmt/values-ssp.yaml
   tasks:
 
   - name: Deploy the static Gluster service inside the Kubernetes cluster
