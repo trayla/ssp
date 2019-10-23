@@ -64,10 +64,10 @@ function create_datanode () {
   ansible kubenode$1 -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml -a "apt install -y lvm2 xfsprogs software-properties-common"
 
   # Attach the first data disks
-  attach_datadisk $1 vdb 100G
-  attach_datadisk $1 vdc 100G
-  attach_datadisk $1 vdd 100G
-  attach_datadisk $1 vde 100G
+  attach_datadisk $1 vdb 200G
+  attach_datadisk $1 vdc 200G
+  attach_datadisk $1 vdd 200G
+  attach_datadisk $1 vde 200G
 }
 
 function create_arbiternode () {

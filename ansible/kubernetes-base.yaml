@@ -4,19 +4,19 @@
     - /opt/mgmt/values-ssp.yaml
   tasks:
 
-  # Copy the Kubernetes client configuration on the Kubernetes master
+    # Copy the Kubernetes client configuration on the Kubernetes master
 
-  - name: Copy Kubernetes configuration from the Kubernetes master to the local sysadm user
-    fetch:
-      src: /home/sysadm/.kube/config
-      dest: /home/sysadm/.kube/config
-      flat: yes
+    - name: Copy Kubernetes configuration from the Kubernetes master to the local sysadm user
+      fetch:
+        src: /home/sysadm/.kube/config
+        dest: /home/sysadm/.kube/config
+        flat: yes
 
-  - name: Copy Kubernetes configuration from the Kubernetes master to the local root user
-    fetch:
-      src: /home/sysadm/.kube/config
-      dest: /root/.kube/config
-      flat: yes
+    - name: Copy Kubernetes configuration from the Kubernetes master to the local root user
+      fetch:
+        src: /home/sysadm/.kube/config
+        dest: /root/.kube/config
+        flat: yes
 
 - hosts: host
   become: yes
@@ -24,92 +24,95 @@
     - /opt/mgmt/values-ssp.yaml
   tasks:
 
-  # Disable Swap files because these are not supported on Docker hosts
+    # Disable Swap files because these are not supported on Docker hosts
 
-  - name: Remove swapfile from /etc/fstab
-    mount:
-      path: none
-      fstype: swap
-      state: absent
+    - name: Remove swapfile from /etc/fstab
+      mount:
+        path: none
+        fstype: swap
+        state: absent
 
-  - name: Disable swap
-    command: swapoff -a
-    when: ansible_swaptotal_mb > 0
+    - name: Disable swap
+      command: swapoff -a
+      when: ansible_swaptotal_mb > 0
 
-  # Install Docker
+    # Install Docker
 
-  - name: Install Docker
-    apt:
-      name: docker.io
-      state: present
-      update_cache: true
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: true
 
-  # Install the Kubernetes management tools
+    # Install the Kubernetes management tools
 
-  - name: Install GPG
-    apt:
-      name: gnupg
-      state: present
+    - name: Install GPG
+      apt:
+        name: gnupg
+        state: present
 
-  - name: Install APT Transport HTTPS
-    apt:
-      name: apt-transport-https
-      state: present
+    - name: Install APT Transport HTTPS
+      apt:
+        name: apt-transport-https
+        state: present
 
-  - name: Add Kubernetes apt-key
-    apt_key:
-      url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-      state: present
+    - name: Add Kubernetes apt-key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
 
-  - name: Add Kubernetes APT repository
-    apt_repository:
-      repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
-      state: present
-      filename: 'kubernetes'
+    - name: Add Kubernetes APT repository
+      apt_repository:
+        repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+        filename: 'kubernetes'
 
-  - name: Install kubectl
-    apt:
-      name: kubectl=1.15.2-00
-      state: present
-      force: yes
+    - name: Install kubectl
+      apt:
+        name: kubectl=1.15.2-00
+        state: present
+        force: yes
 
-  - name: Configure Kubernetes shell autocompletion
-    become: yes
-    shell: kubectl completion bash > /etc/bash_completion.d/kubectl
+    - name: Configure Kubernetes shell autocompletion
+      become: yes
+      shell: kubectl completion bash > /etc/bash_completion.d/kubectl
 
-  # Install the Helm package manager along with the Tiller Companion inside the Kubernetes cluster
+    # Install the Helm package manager along with the Tiller Companion inside the Kubernetes cluster
 
-  - name: Download the Helm package manager
-    get_url:
-      url: https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get
-      dest: /tmp/install-helm.sh
-      mode: '0755'
+    - name: Download the Helm package manager
+      get_url:
+        url: https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get
+        dest: /tmp/install-helm.sh
+        mode: '0755'
 
-  - name: Install Helm
-    shell: /tmp/install-helm.sh
+    - name: Install Helm
+      shell: /tmp/install-helm.sh
 
-  - name: Create a service account for Tiller
-    shell: kubectl -n kube-system delete serviceaccounts tiller --ignore-not-found=true && kubectl -n kube-system create serviceaccount tiller
+    - name: Create a service account for Tiller
+      shell: kubectl -n kube-system delete serviceaccounts tiller --ignore-not-found=true && kubectl -n kube-system create serviceaccount tiller
 
-  - name: Create a cluster role binding for Tiller
-    shell: kubectl -n kube-system delete clusterrolebinding tiller --ignore-not-found=true && kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+    - name: Create a cluster role binding for Tiller
+      shell: kubectl -n kube-system delete clusterrolebinding tiller --ignore-not-found=true && kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
 
-  - name: Initialize Helm and the Tiller companion inside the Kubernetes cluster
-    shell: helm init --service-account tiller
-    register: helm_init_result
+    - name: Initialize Helm and the Tiller companion inside the Kubernetes cluster
+      shell: helm init --service-account tiller
+      register: helm_init_result
 
-  - name: Show Helm init result
-    debug:
-      msg: "{{ helm_init_result.stdout_lines }}"
+    - name: Show Helm init result
+      debug:
+        msg: "{{ helm_init_result.stdout_lines }}"
 
-  - name: Ensure that Tiller is running
-    shell: kubectl get pods --namespace kube-system -l name=tiller
-    register: kubectl_kube_system_pods
-    until: kubectl_kube_system_pods.stdout.find("Running") != -1
-    retries: 5
-    delay: 10
+    - name: Ensure that Tiller is running
+      shell: kubectl get pods --namespace kube-system -l name=tiller
+      register: kubectl_kube_system_pods
+      until: kubectl_kube_system_pods.stdout.find("Running") != -1
+      retries: 5
+      delay: 10
 
-  # Install the base components
+    # Install the base components
 
-  - name: Create the base namespace
-    shell: kubectl create namespace ssp-base
+    - name: Create the base namespace
+      shell: kubectl create namespace ssp-base
+
+    - name: Create the Docker Registry pull secret inside all custom namespaces
+      shell: "kubectl create -n ssp-base secret generic admin-password --from-literal=admin-user=admin --from-literal=admin-password={{ platform.admin.password }}"
