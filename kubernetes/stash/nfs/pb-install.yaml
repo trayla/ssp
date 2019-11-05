@@ -1,0 +1,17 @@
+- hosts: host
+  become: yes
+  vars_files:
+    - /opt/mgmt/values-ssp.yaml
+  tasks:
+
+    - name: Add the AppsCode Helm repository
+      shell: helm repo add appscode https://charts.appscode.com/stable/
+
+    - name: Update the local Helm repository
+      shell: helm repo update
+
+    - name: Install the Stash operator via it's Helm chart
+      shell: helm install appscode/stash --namespace ssp-base --name backup-operator --version v0.9.0-rc.2
+
+    - name: Install the Backup NFS server via it's Helm script
+      shell: helm install --namespace ssp-base --name backup-store --values /opt/mgmt/values-ssp.yaml /opt/mgmt/ssp/kubernetes/stash/nfs

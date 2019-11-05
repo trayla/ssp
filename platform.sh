@@ -180,6 +180,9 @@ elif [ "$1" == "install" ]; then
   # Deploy custom namespaces
   ansible-playbook -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml $BASEDIR/ansible/kubernetes-customns.yaml
 
+  # Deploy the Stash backup
+  ansible-playbook -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml $BASEDIR/kubernetes/stash/pb-install.yaml
+
   reboot
 
 elif [ "$1" == "remove" ]; then

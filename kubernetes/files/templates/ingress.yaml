@@ -8,16 +8,14 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     kubernetes.io/tls-acme: "true"
-#    nginx.ingress.kubernetes.io/auth-type: basic
-#    nginx.ingress.kubernetes.io/auth-secret: basic-auth
-#    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+    nginx.ingress.kubernetes.io/proxy-body-size: 10G
 spec:
   tls:
     - hosts:
-        - files.{{ .Values.platform.domain }}
+        - files.ssp.{{ .Values.platform.domain }}
       secretName: {{ $fullName }}-tls
   rules:
-    - host: files.{{ .Values.platform.domain }}
+    - host: files.ssp.{{ .Values.platform.domain }}
       http:
         paths:
           - path: /
