@@ -137,7 +137,7 @@ chown -R sysadm:sysadm /opt/mgmt
 
 The values file defines specific customizations of your own topology. A sample file is included in this repository. It should be copied to /opt/mgmt and customized before further installation.
 ```ShellSession
-cp /opt/mgmt/ssp/values-default.yaml /opt/mgmt/values.yaml
+cp /opt/mgmt/ssp/values-default.yaml /opt/mgmt/values-ssp.yaml
 ```
 
 #### Domain

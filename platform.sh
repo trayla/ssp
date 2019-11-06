@@ -4,10 +4,6 @@ BASEDIR=$(dirname "$0")
 
 KUBEMASTER_IPADDR="10.88.20.109"
 
-STORAGELAYOUT=`$BASEDIR/python/read-value-storagelayout.py`
-WORKERSRAM=`$BASEDIR/python/read-value-workersram.py`
-ADMINPASSWORD=`$BASEDIR/python/read-value-adminpassword.py`
-
 function attach_arbiterdisk () {
   VM=kubenode$1
   DEVICE=$2
@@ -105,7 +101,7 @@ fi
 
 if [ "$1" == "prepare" ]; then
   # Install aptitude which is necessary for Ansible
-  apt install aptitude -y
+  apt install aptitude python-pip -y
 
   # Install Python packages
   pip install pyyaml
@@ -124,10 +120,16 @@ if [ "$1" == "prepare" ]; then
   ssh-keygen -f /home/sysadm/.ssh/id_rsa -N ""
   chown -R sysadm:sysadm /home/sysadm/.ssh
 
+  STORAGELAYOUT=`$BASEDIR/python/read-value-storagelayout.py`
+
   # Create the LVM
   ansible-playbook -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml $BASEDIR/ansible/host-prepare.yaml
 
 elif [ "$1" == "install" ]; then
+  STORAGELAYOUT=`$BASEDIR/python/read-value-storagelayout.py`
+  WORKERSRAM=`$BASEDIR/python/read-value-workersram.py`
+  ADMINPASSWORD=`$BASEDIR/python/read-value-adminpassword.py`
+
   # Create the Kubernetes master
   $BASEDIR/scripts/deploy-vm.sh kubemaster 2048 4 20G pw $KUBEMASTER_IPADDR
   ssh-keygen -f "/root/.ssh/known_hosts" -R $KUBEMASTER_IPADDR
