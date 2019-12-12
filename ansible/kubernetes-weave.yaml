@@ -6,9 +6,6 @@
 
   # Install Weave Scope
 
-  - name: Create the weave namespace
-    shell: kubectl create -f /opt/mgmt/ssp/kubernetes/weave/ns.yaml
-
   - name: Install Weave cluster permissions
     shell: kubectl create -f /opt/mgmt/ssp/kubernetes/weave/sa.yaml -f /opt/mgmt/ssp/kubernetes/weave/cluster-role.yaml -f /opt/mgmt/ssp/kubernetes/weave/cluster-role-binding.yaml
 
@@ -21,11 +18,14 @@
       apiVersion: extensions/v1beta1
       kind: Ingress
       metadata:
-        namespace: weave
+        namespace: ssp-base
         name: weave
         annotations:
           kubernetes.io/ingress.class: nginx
           kubernetes.io/tls-acme: "true"
+          nginx.ingress.kubernetes.io/auth-type: basic
+          nginx.ingress.kubernetes.io/auth-secret: basic-auth
+          nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
       spec:
         tls:
         - hosts:

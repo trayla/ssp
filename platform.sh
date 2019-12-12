@@ -22,14 +22,14 @@ function attach_arbiterdisk () {
   virsh attach-disk $VM --source $FILE --target $DEVICE --persistent --subdriver qcow2
 
   # Create a physical volume for the newly attached disk
-  ansible kubenode$1 -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml -a "pvcreate /dev/$DEVICE"
+  ansible kubenode$1 -i $BASEDIR/ansible/inventory.yaml -a "pvcreate /dev/$DEVICE"
 }
 
 function attach_datadisk () {
   VM=kubenode$1
   DEVICE=$2
   SIZE=$3
-  FILE=/data$1/kubenode$1_$2.qcow2
+  FILE=/data/data$1/kubenode$1_$2.qcow2
 
   if [ -f $FILE ]; then
     echo "Disk image $FILE already exists!"
@@ -43,7 +43,7 @@ function attach_datadisk () {
   virsh attach-disk $VM --source $FILE --target $DEVICE --persistent --subdriver qcow2
 
   # Create a physical volume for the newly attached disk
-  ansible kubenode$1 -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml -a "pvcreate /dev/$DEVICE"
+  ansible kubenode$1 -i $BASEDIR/ansible/inventory.yaml -a "pvcreate /dev/$DEVICE"
 }
 
 function create_datanode () {
@@ -57,7 +57,7 @@ function create_datanode () {
   ssh-keygen -f "/home/sysadm/.ssh/known_hosts" -R $IPADDR
 
   # Install the Logical Volume Manager (LVM)
-  ansible kubenode$1 -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml -a "apt install -y lvm2 xfsprogs software-properties-common"
+  ansible kubenode$1 -i $BASEDIR/ansible/inventory.yaml -a "apt install -y lvm2 xfsprogs software-properties-common"
 
   # Attach the first data disks
   attach_datadisk $1 vdb 200G
@@ -77,7 +77,7 @@ function create_arbiternode () {
   ssh-keygen -f "/home/sysadm/.ssh/known_hosts" -R $IPADDR
 
   # Install the Logical Volume Manager (LVM)
-  ansible kubenode$1 -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml -a "apt install -y lvm2 xfsprogs software-properties-common"
+  ansible kubenode$1 -i $BASEDIR/ansible/inventory.yaml -a "apt install -y lvm2 xfsprogs software-properties-common"
 
   # Attach the first data disks
   attach_arbiterdisk $1 vdb 20G
@@ -88,10 +88,10 @@ function add_disk () {
   attach_datadisk $1 $2 100G
 
   # Add the new physical volume to the volume group
-  ansible kubenode$1 -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml -a "vgextend vg0 /dev/$2"
+  ansible kubenode$1 -i $BASEDIR/ansible/inventory.yaml -a "vgextend vg0 /dev/$2"
 
   # Add the new physical volume to the logical volume
-  ansible kubenode$1 -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml -a "lvextend /dev/vg0/lv0 /dev/$2 -r"
+  ansible kubenode$1 -i $BASEDIR/ansible/inventory.yaml -a "lvextend /dev/vg0/lv0 /dev/$2 -r"
 }
 
 if [ "$EUID" -ne 0 ]
@@ -100,7 +100,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 if [ "$1" == "prepare" ]; then
-  # Install aptitude which is necessary for Ansible
+   # Install aptitude which is necessary for Ansible
   apt install aptitude python-pip -y
 
   # Install Python packages
@@ -120,13 +120,10 @@ if [ "$1" == "prepare" ]; then
   ssh-keygen -f /home/sysadm/.ssh/id_rsa -N ""
   chown -R sysadm:sysadm /home/sysadm/.ssh
 
-  STORAGELAYOUT=`$BASEDIR/python/read-value-storagelayout.py`
-
   # Create the LVM
-  ansible-playbook -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml $BASEDIR/ansible/host-prepare.yaml
+  ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/host-prepare.yaml
 
 elif [ "$1" == "install" ]; then
-  STORAGELAYOUT=`$BASEDIR/python/read-value-storagelayout.py`
   WORKERSRAM=`$BASEDIR/python/read-value-workersram.py`
   ADMINPASSWORD=`$BASEDIR/python/read-value-adminpassword.py`
 
@@ -135,11 +132,6 @@ elif [ "$1" == "install" ]; then
   ssh-keygen -f "/root/.ssh/known_hosts" -R $KUBEMASTER_IPADDR
   ssh-keygen -f "/home/sysadm/.ssh/known_hosts" -R $KUBEMASTER_IPADDR
 
-  if [ "$STORAGELAYOUT" == "3disk" ]; then
-    # Create the arbiter node
-    create_arbiternode 0 110
-  fi
-
   # Create the first data node
   create_datanode 1 111
 
@@ -147,54 +139,49 @@ elif [ "$1" == "install" ]; then
   create_datanode 2 112
 
   # Add the nodes to the hosts file of each node
-  ansible-playbook -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml $BASEDIR/ansible/kubernetes-hosts.yaml
+  ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/kubernetes-hosts.yaml
 
   # Prepare all nodes with a basic install like Docker
-  ansible-playbook -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml $BASEDIR/ansible/kubernetes-prepare.yaml
+  ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/kubernetes-prepare.yaml
 
   # Install the master node
-  ansible-playbook -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml $BASEDIR/ansible/kubernetes-master.yaml
+  ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/kubernetes-master.yaml
 
   # Install the worker nodes
-  ansible-playbook -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml $BASEDIR/ansible/kubernetes-nodes.yaml
+  ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/kubernetes-nodes.yaml
 
   # Install the base components
-  ansible-playbook -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml $BASEDIR/ansible/kubernetes-base.yaml
+  ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/kubernetes-base.yaml
 
   # Install the GlusterFS Cluster
-  ansible-playbook -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml $BASEDIR/ansible/kubernetes-gluster.yaml
+  ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/kubernetes-gluster.yaml
 
   # Install Heketi, the storage API for GlusterFS
-  ansible-playbook -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml $BASEDIR/ansible/kubernetes-heketi.yaml
+  ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/kubernetes-heketi.yaml
 
   # Install the Ingress based on Nginx
-  ansible-playbook -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml $BASEDIR/ansible/kubernetes-nginx.yaml
+  ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/kubernetes-nginx.yaml
 
   # Install the monitoring solution
-  ansible-playbook -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml $BASEDIR/ansible/kubernetes-monitoring.yaml
+  ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/kubernetes-monitoring.yaml
 
   # Install Weave
-  ansible-playbook -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml $BASEDIR/ansible/kubernetes-weave.yaml
+  ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/kubernetes-weave.yaml
 
   # Install the Docker Registry
-  ansible-playbook -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml $BASEDIR/ansible/kubernetes-dockerreg.yaml
+  ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/kubernetes-dockerreg.yaml
 
   # Deploy custom namespaces
-  ansible-playbook -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml $BASEDIR/ansible/kubernetes-customns.yaml
+  ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/ansible/kubernetes-customns.yaml
 
   # Deploy the Stash backup
-  ansible-playbook -i $BASEDIR/ansible/inventory-$STORAGELAYOUT.yaml $BASEDIR/kubernetes/stash/pb-install.yaml
+  ansible-playbook -i $BASEDIR/ansible/inventory.yaml $BASEDIR/kubernetes/stash/pb-install.yaml
 
   reboot
 
 elif [ "$1" == "remove" ]; then
   virsh destroy kubemaster
   virsh undefine kubemaster
-
-  if [ "$STORAGELAYOUT" == "3disk" ]; then
-    virsh destroy kubenode0
-    virsh undefine kubenode0
-  fi
 
   virsh destroy kubenode1
   virsh undefine kubenode1
@@ -203,8 +190,8 @@ elif [ "$1" == "remove" ]; then
   virsh undefine kubenode2
 
   rm /vmpool/kube*
-  rm /data1/kube*
-  rm /data2/kube*
+  rm /data/data1/kube*
+  rm /data/data2/kube*
 
   reboot
 

@@ -5,4 +5,4 @@ metadata:
   name: weave-scope
   labels:
     name: weave-scope
-  namespace: weave
+  namespace: ssp-base

@@ -8,7 +8,7 @@ metadata:
     app: weave-scope
     weave-cloud-component: scope
     weave-scope-component: agent
-  namespace: weave
+  namespace: ssp-base
 spec:
   minReadySeconds: 5
   selector:

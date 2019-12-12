@@ -177,9 +177,9 @@
       enabled: yes
       daemon_reload: yes
 
-  - name: Create the Heketi 1 disk topology definition
+  - name: Create the Heketi topology definition
     copy:
-      dest: /etc/heketi/topology-1disk.json
+      dest: /etc/heketi/topology.json
       content: |
         {
           "clusters": [
@@ -215,83 +215,6 @@
                       ]
                     },
                     "zone": 1
-                  },
-                  "devices": [
-                    "/dev/vdb",
-                    "/dev/vdc",
-                    "/dev/vdd",
-                    "/dev/vde"
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-
-
-  - name: Create the Heketi 3 disk topology definition
-    copy:
-      dest: /etc/heketi/topology-3disk.json
-      content: |
-        {
-          "clusters": [
-            {
-              "nodes": [
-                {
-                  "node": {
-                    "hostnames": {
-                      "manage": [
-                        "kubenode0"
-                      ],
-                      "storage": [
-                        "10.88.20.110"
-                      ]
-                    },
-                    "zone": 1,
-                    "tags": {
-                      "arbiter": "required"
-                    }
-                  },
-                  "devices": [
-                    "/dev/vdb"
-                  ]
-                },
-                {
-                  "node": {
-                    "hostnames": {
-                      "manage": [
-                        "kubenode1"
-                      ],
-                      "storage": [
-                        "10.88.20.111"
-                      ]
-                    },
-                    "zone": 1,
-                    "tags": {
-                      "arbiter": "disabled" 
-                    }
-                  },
-                  "devices": [
-                    "/dev/vdb",
-                    "/dev/vdc",
-                    "/dev/vdd",
-                    "/dev/vde"
-                  ]
-                },
-                {
-                  "node": {
-                    "hostnames": {
-                      "manage": [
-                        "kubenode2"
-                      ],
-                      "storage": [
-                        "10.88.20.112"
-                      ]
-                    },
-                    "zone": 1,
-                    "tags": {
-                      "arbiter": "disabled" 
-                    }
                   },
                   "devices": [
                     "/dev/vdb",
@@ -332,7 +255,7 @@
   tasks:
 
   - name: Initialize Heketi with the storage topology
-    shell: "/usr/local/bin/heketi-cli topology load --json=/etc/heketi/topology-{{ platform.storagelayout }}.json"
+    shell: "/usr/local/bin/heketi-cli topology load --json=/etc/heketi/topology.json"
     environment:
       HEKETI_CLI_SERVER: "http://10.88.20.109:8080"
       HEKETI_CLI_USER: "admin"
@@ -351,4 +274,4 @@
     shell: "kubectl create -f /opt/mgmt/ssp/kubernetes/gluster/dynamic-secret.yaml"
 
   - name: Deploy the default storage class inside the Kubernetes cluster
-    shell: "kubectl create -f /opt/mgmt/ssp/kubernetes/gluster/dynamic-storageclass-{{ platform.storagelayout }}.yaml"
+    shell: "kubectl create -f /opt/mgmt/ssp/kubernetes/gluster/dynamic-storageclass.yaml"

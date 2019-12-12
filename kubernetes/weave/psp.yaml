@@ -7,7 +7,7 @@ spec:
   hostPID: true
   hostNetwork: true
   allowedCapabilities:
-  - 'NET_ADMIN'
+    - 'NET_ADMIN'
   fsGroup:
     rule: RunAsAny
   runAsUser:
@@ -17,5 +17,5 @@ spec:
   supplementalGroups:
     rule: RunAsAny
   volumes:
-  - secret
-  - hostPath
+    - secret
+    - hostPath

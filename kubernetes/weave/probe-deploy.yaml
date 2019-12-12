@@ -8,7 +8,7 @@ metadata:
     app: weave-scope
     weave-cloud-component: scope
     weave-scope-component: cluster-agent
-  namespace: weave
+  namespace: ssp-base
 spec:
   replicas: 1
   selector:

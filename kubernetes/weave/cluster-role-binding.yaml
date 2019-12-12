@@ -5,7 +5,7 @@ metadata:
   name: weave-scope
   labels:
     name: weave-scope
-  namespace: weave
+  namespace: ssp-base
 roleRef:
   kind: ClusterRole
   name: weave-scope
@@ -13,4 +13,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: weave-scope
-    namespace: weave
+    namespace: ssp-base
