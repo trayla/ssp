@@ -194,22 +194,16 @@ ssh sysadm@<ipaddr>
 
 Purpose: Kubernetes master
 
-IP Address: 10.88.20.109
-
-#### kubenode0
-
-Purpose: Kubernetes worker node with storage arbiter
-
 IP Address: 10.88.20.110
 
 #### kubenode1
 
-Purpose: First Kubernetes worker node with data storage leg 1
+Purpose: First Kubernetes worker node with data storage
 
 IP Address: 10.88.20.111
 
 #### kubenode2
 
-Purpose: Second Kubernetes worker node with data storage leg 2
+Purpose: Second Kubernetes worker node with data storage
 
 IP Address: 10.88.20.112

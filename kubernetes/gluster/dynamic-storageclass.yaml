@@ -6,7 +6,7 @@ metadata:
     storageclass.kubernetes.io/is-default-class: "true"
 provisioner: kubernetes.io/glusterfs
 parameters:
-  resturl: http://10.88.20.109:8080
+  resturl: http://10.88.20.110:8080
   restuser: admin
   secretName: heketi-secret
   secretNamespace: default

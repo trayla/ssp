@@ -75,11 +75,11 @@
       table: nat
       chain: POSTROUTING
       protocol: tcp
-      source: 10.88.20.0/24
+      source: '{{ platform.network.ipprefix }}.0/24'
       destination: '{{ hostvars.kubenode1.ansible_host }}/32'
       match: multiport
       jump: MASQUERADE
       destination_port: '{{ nginx_port_http.stdout }},{{ nginx_port_https.stdout }}'
 
   - name: Allow forwarding of inbound traffic
-    shell: '/sbin/iptables -I FORWARD -m state -d 10.88.20.0/24 --state NEW,RELATED,ESTABLISHED -j ACCEPT'
+    shell: '/sbin/iptables -I FORWARD -m state -d {{ platform.network.ipprefix }}.0/24 --state NEW,RELATED,ESTABLISHED -j ACCEPT'

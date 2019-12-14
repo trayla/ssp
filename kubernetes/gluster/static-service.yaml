@@ -4,10 +4,6 @@ metadata:
   name: glusterfs-static
 subsets:
   - addresses:
-      - ip: 10.88.20.110
-    ports:
-      - port: 1
-  - addresses:
       - ip: 10.88.20.111
     ports:
       - port: 1

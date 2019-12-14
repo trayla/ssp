@@ -147,9 +147,9 @@
               </nat>
             </forward>
             <bridge name='virbr0' stp='on' delay='0'/>
-            <ip address='10.88.20.1' netmask='255.255.255.0'>
+            <ip address='{{ platform.network.ipprefix }}.1' netmask='255.255.255.0'>
               <dhcp>
-                <range start='10.88.20.230' end='10.88.20.245'/>
+                <range start='{{ platform.network.ipprefix }}.230' end='{{ platform.network.ipprefix }}.245'/>
               </dhcp>
             </ip>
           </network>

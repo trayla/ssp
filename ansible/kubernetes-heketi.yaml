@@ -192,7 +192,7 @@
                         "kubenode1"
                       ],
                       "storage": [
-                        "10.88.20.111"
+                        "{{ platform.network.ipprefix }}.111"
                       ]
                     },
                     "zone": 1
@@ -211,7 +211,7 @@
                         "kubenode2"
                       ],
                       "storage": [
-                        "10.88.20.112"
+                        "{{ platform.network.ipprefix }}.112"
                       ]
                     },
                     "zone": 1
@@ -257,7 +257,7 @@
   - name: Initialize Heketi with the storage topology
     shell: "/usr/local/bin/heketi-cli topology load --json=/etc/heketi/topology.json"
     environment:
-      HEKETI_CLI_SERVER: "http://10.88.20.109:8080"
+      HEKETI_CLI_SERVER: "http://{{ platform.network.ipprefix }}.110:8080"
       HEKETI_CLI_USER: "admin"
       HEKETI_CLI_KEY: "PASSWORD"
 

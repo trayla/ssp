@@ -52,5 +52,5 @@
     - /opt/mgmt/values-ssp.yaml
   tasks:
 
-  - name: Deploy the static Gluster service inside the Kubernetes cluster
-    shell: "kubectl create -f /opt/mgmt/ssp/kubernetes/gluster/static-service.yaml"
+    - name: Deploy the static Gluster service inside the Kubernetes cluster
+      shell: "kubectl create -f /opt/mgmt/ssp/kubernetes/gluster/static-service.yaml"

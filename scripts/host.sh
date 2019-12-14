@@ -26,7 +26,7 @@ if [ "$1" == "prepare" ]; then
   chown -R sysadm:sysadm /home/sysadm/.ssh
 
   # Create the LVM
-  ansible-playbook -i $BASEDIR/../ansible/inventory.yaml $BASEDIR/../ansible/host-prepare.yaml
+  ansible-playbook -i $BASEDIR/../python/get-ansible-inventory.py $BASEDIR/../ansible/host-prepare.yaml
 
 else
   echo "Prepares the host machine for the platform installation"
