@@ -123,16 +123,16 @@ ssh sysadm@<ipaddr>
 
 Purpose: Kubernetes master
 
-IP Address: 10.88.20.110
+IP Address: XX.YY.ZZ.110
 
 #### kubenode1
 
 Purpose: First Kubernetes worker node with data storage
 
-IP Address: 10.88.20.111
+IP Address: XX.YY.ZZ.111
 
 #### kubenode2
 
 Purpose: Second Kubernetes worker node with data storage
 
-IP Address: 10.88.20.112
+IP Address: XX.YY.ZZ.112
