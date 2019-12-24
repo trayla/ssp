@@ -17,17 +17,15 @@
 
 ### Necessary preliminaries
 
-#### Storage
-
-Your system has to provide three directories which will be used as KVM storage pools and therefore populated with disk images for the upcoming virtual machines. The following directories have to be create prior to the start of the installation procedure:
-
-A sample setup could be to use two free partition on independent disks managed by the Logical Volume Manager (LVM). In the following example we are using XFS as the file system. This is not necessary but a good choice. In order to use it on a Ubuntu server you have to install the appropriate package:
+Install necessery packages:
 
 ~~~~ShellSession
 pip install pyyaml
 ~~~~
 
-Three data directories are needed to store the virtual machine content:
+#### Storage
+
+Your system has to provide three directories which will be used as KVM storage pools and therefore populated with disk images for the upcoming virtual machines. The following directories have to be create prior to the start of the installation procedure. 
 
 ##### /vmpool
 
