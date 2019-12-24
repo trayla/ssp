@@ -90,7 +90,7 @@ This command removes the whole plattform from your host:
 sudo /opt/mgmt/ssp/platform.sh remove
 ```
 
-After completion the system will be restarted. It takes a couple of until all virtual machines and services are up an running.
+After completion the system will be restarted. It takes a couple minutes of until all virtual machines and services are up an running.
 
 ## Result
 
