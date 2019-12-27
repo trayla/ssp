@@ -17,104 +17,33 @@
 
 ### Necessary preliminaries
 
+Install necessery packages:
+
+~~~~ShellSession
+pip install pyyaml
+~~~~
+
 #### Storage
 
-Your system has to provide three directories which will be used as KVM storage pools and therefore populated with disk images for the upcoming virtual machines. The following directories have to be create prior to the start of the installation procedure:
-
-A sample setup could be to use two free partition on independent disks managed by the Logical Volume Manager (LVM). In the following example we are using XFS as the file system. This is not necessary but a good choice. In order to use it on a Ubuntu server you have to install the appropriate package:
-
-~~~~ShellSession
-apt install -y xfsprogs
-~~~~
-
-Initialize the LVM on two disks. Please replace /dev/sda4 and /dev/sdb4 with the device of your choice.
-
-Create two physical volumes, each on one disk:
-~~~~ShellSession
-pvcreate /dev/sda4
-pvcreate /dev/sdb4
-~~~~
-
-Create two volume groups, each for one disk:
-~~~~ShellSession
-vgcreate vga /dev/sda4
-vgcreate vgb /dev/sdb4
-~~~~
+Your system has to provide three directories which will be used as KVM storage pools and therefore populated with disk images for the upcoming virtual machines. The following directories have to be create prior to the start of the installation procedure. 
 
 ##### /vmpool
 
 This directory is going to be used as the default storage pool for all virtual machine images except the data images. For redundancy reasons it is recommended to store this directory at least on a RAID 1 device.
-
-Create one logical volume on each volume group as a base of the default storage pool:
-```ShellSession
-lvcreate --size 150g -n lvp vga
-lvcreate --size 150g -n lvp vgb
-```
-
-Create a RAID1 array of both newly created logical volumes to ensure redundancy:
-```ShellSession
-mdadm --create /dev/md10 --level=mirror --raid-devices=2 /dev/vga/lvp /dev/vgb/lvp
-```
-
-Verify the RAID disk with the following command:
-```ShellSession
-cat /proc/mdstat
-```
-
-Format the RAID disk with a XFS filesystem:
-```ShellSession
-mkfs.xfs /dev/md10
-```
 
 Create the directory of the default storage pool:
 ```ShellSession
 mkdir -p /vmpool
 ```
 
-Add the newly created RAID disk to the /etc/fstab file to be automatically mounted after system restarts:
-```ShellSession
-echo "/dev/md10 /vmpool xfs defaults 0 0" >> /etc/fstab
-```
-
-Mount the default storage pool:
-```ShellSession
-mount /vmpool
-```
-
-##### /data1 and /data2
+##### /data/data1 and /data/data2
 
 These directories are going to be used as redundancy nodes for the storage cluster and should be on seperate storage disks. Using a high available disk setup like RAID 1 or 5 is not necessary here due to the redenundany of the upcoming storage cluster.
 
-Create the first data disk (replace /dev/sda4 by your partition device and "200g" by a storage size of your choice in giga bytes):
-
 Create the directories of the data storage pools:
 ```ShellSession
-mkdir -p /data1
-mkdir -p /data2
-```
-
-Create logical volumes for the data storage pools:
-```ShellSession
-lvcreate --size 500g -n lvd vga
-lvcreate --size 500g -n lvd vgb
-```
-
-Format the disks with the XFS filesystem:
-```ShellSession
-mkfs.xfs /dev/vga/lvd
-mkfs.xfs /dev/vgb/lvd
-```
-
-Add the newly created disk to the /etc/fstab file to be automatically mounted after system restarts:
-```ShellSession
-echo "/dev/vga/lvd /data1 xfs defaults 0 0" >> /etc/fstab
-echo "/dev/vgb/lvd /data2 xfs defaults 0 0" >> /etc/fstab
-```
-
-Mount the first data storage disk:
-```ShellSession
-mount /data1
-mount /data2
+mkdir -p /data/data1
+mkdir -p /data/data2
 ```
 
 #### A sudo user for system administration
@@ -161,7 +90,7 @@ This command removes the whole plattform from your host:
 sudo /opt/mgmt/ssp/platform.sh remove
 ```
 
-After completion the system will be restarted. It takes a couple of until all virtual machines and services are up an running.
+After completion the system will be restarted. It takes a couple minutes of until all virtual machines and services are up an running.
 
 ## Result
 
@@ -171,7 +100,7 @@ If everything worked as expected you should have the following setting on your m
 
 This picture shows an architectural overview of the desired platform:
 
-![system landscape](/docs/systemlandscape.svg)
+![system landscape](https://raw.githubusercontent.com/trayla/ssp/master/docs/systemlandscape.svg?sanitize=true)
 
 ### Virtual machines:
 
@@ -194,16 +123,16 @@ ssh sysadm@<ipaddr>
 
 Purpose: Kubernetes master
 
-IP Address: 10.88.20.110
+IP Address: XX.YY.ZZ.110
 
 #### kubenode1
 
 Purpose: First Kubernetes worker node with data storage
 
-IP Address: 10.88.20.111
+IP Address: XX.YY.ZZ.111
 
 #### kubenode2
 
 Purpose: Second Kubernetes worker node with data storage
 
-IP Address: 10.88.20.112
+IP Address: XX.YY.ZZ.112
