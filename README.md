@@ -20,6 +20,7 @@
 Install necessery packages:
 
 ~~~~ShellSession
+apt install python-pip -y
 pip install pyyaml
 ~~~~
 
