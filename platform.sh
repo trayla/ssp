@@ -56,10 +56,10 @@ function add_disk () {
   attach_datadisk $1 $2 100G
 
   # Add the new physical volume to the volume group
-  ansible kubenode$1 -i $BASEDIR/ansible/inventory.yaml -a "vgextend vg0 /dev/$2"
+  ansible kubenode$1 -i $BASEDIR/python/get-ansible-inventory.py -a "vgextend vg0 /dev/$2"
 
   # Add the new physical volume to the logical volume
-  ansible kubenode$1 -i $BASEDIR/ansible/inventory.yaml -a "lvextend /dev/vg0/lv0 /dev/$2 -r"
+  ansible kubenode$1 -i $BASEDIR/python/get-ansible-inventory.py -a "lvextend /dev/vg0/lv0 /dev/$2 -r"
 }
 
 if [ "$EUID" -ne 0 ]
