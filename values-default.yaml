@@ -1,5 +1,9 @@
 platform:
 
+  assets:
+    kubernetes:
+      version: 1.15.2-00
+
   # Your domain, the platform should be reachable through
   domain: example.com
 

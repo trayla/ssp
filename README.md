@@ -51,7 +51,7 @@ mkdir -p /data/data2
 
 Create a system administrator user and disable root
 ```ShellSession
-adduser sysadm
+adduser -u 999 sysadm
 usermod -aG sudo sysadm
 passwd -l root
 ```
@@ -120,20 +120,26 @@ or by connection to the virtual machine over SSH (password is "pw")
 ssh sysadm@<ipaddr>
 ```
 
+#### console
+
+Purpose: Management machine
+
+IP Address: XX.ZZ.YY.1
+
 #### kubemaster
 
 Purpose: Kubernetes master
 
-IP Address: XX.YY.ZZ.110
+IP Address: XX.YY.ZZ.10
 
 #### kubenode1
 
 Purpose: First Kubernetes worker node with data storage
 
-IP Address: XX.YY.ZZ.111
+IP Address: XX.YY.ZZ.11
 
 #### kubenode2
 
 Purpose: Second Kubernetes worker node with data storage
 
-IP Address: XX.YY.ZZ.112
+IP Address: XX.YY.ZZ.12

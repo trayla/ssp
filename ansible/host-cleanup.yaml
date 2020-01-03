@@ -1,0 +1,80 @@
+- hosts: host
+  vars_files:
+    - /opt/mgmt/values-ssp.yaml
+  become: yes
+  tasks:
+
+    # Remove the virtual machines
+
+    - name: Destroy the virtual machines
+      virt:
+        command: destroy
+        name: "{{ item }}"
+      with_items:
+        - ssp_console
+        - ssp_kubemaster
+        - ssp_kubenode1
+        - ssp_kubenode2
+      ignore_errors: yes
+
+    - name: Undefine the virtual machines
+      virt:
+        command: undefine
+        name: "{{ item }}"
+      with_items:
+        - ssp_console
+        - ssp_kubemaster
+        - ssp_kubenode1
+        - ssp_kubenode2
+      ignore_errors: yes
+
+    # Remove the storage pools
+
+    - name: Destroy the storage pools
+      virt_pool:
+        command: destroy
+        name: "{{ item }}"
+      with_items:
+        - ssp_default
+        - ssp_data1
+        - ssp_data2
+      ignore_errors: yes
+
+    - name: Undefine the storage pools
+      virt_pool:
+        command: undefine
+        name: "{{ item }}"
+      with_items:
+        - ssp_default
+        - ssp_data1
+        - ssp_data2
+      ignore_errors: yes
+
+    # Remove the network configuration
+
+    - name: Destroy the default network configuration
+      virt_net:
+        command: destroy
+        name: ssp_default
+      ignore_errors: yes
+
+    - name: Destroy the default network
+      virt_net:
+        command: destroy
+        name: ssp_default
+      ignore_errors: yes
+
+    - name: Remove the default network configuration
+      virt_net:
+        command: undefine
+        name: ssp_default
+      ignore_errors: yes
+
+    # Remove the startup configuration
+
+    - name: Register the system startup procedure
+      lineinfile:
+        path: /etc/rc.local
+        state: absent
+        line: 'ansible-playbook -i /opt/mgmt/ssp/python/get-ansible-inventory.py /opt/mgmt/ssp/ansible/startup.yaml'
+      ignore_errors: yes

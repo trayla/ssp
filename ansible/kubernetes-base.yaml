@@ -1,81 +1,17 @@
-- hosts: kubemaster
+- hosts: console
   become: yes
   vars_files:
     - /opt/mgmt/values-ssp.yaml
   tasks:
 
-    # Copy the Kubernetes client configuration on the Kubernetes master
+    # Install the Flannel SDN (Software Defined Network) implementation
 
-    - name: Copy Kubernetes configuration from the Kubernetes master to the local sysadm user
-      fetch:
-        src: /home/sysadm/.kube/config
-        dest: /home/sysadm/.kube/config
-        flat: yes
-
-    - name: Copy Kubernetes configuration from the Kubernetes master to the local root user
-      fetch:
-        src: /home/sysadm/.kube/config
-        dest: /root/.kube/config
-        flat: yes
-
-- hosts: host
-  become: yes
-  vars_files:
-    - /opt/mgmt/values-ssp.yaml
-  tasks:
-
-    # Disable Swap files because these are not supported on Docker hosts
-
-    - name: Remove swapfile from /etc/fstab
-      mount:
-        path: none
-        fstype: swap
-        state: absent
-
-    - name: Disable swap
-      command: swapoff -a
-      when: ansible_swaptotal_mb > 0
-
-    # Install Docker
-
-    - name: Install Docker
-      apt:
-        name: docker.io
-        state: present
-        update_cache: true
-
-    # Install the Kubernetes management tools
-
-    - name: Install GPG
-      apt:
-        name: gnupg
-        state: present
-
-    - name: Install APT Transport HTTPS
-      apt:
-        name: apt-transport-https
-        state: present
-
-    - name: Add Kubernetes apt-key
-      apt_key:
-        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-        state: present
-
-    - name: Add Kubernetes APT repository
-      apt_repository:
-        repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
-        state: present
-        filename: 'kubernetes'
-
-    - name: Install kubectl
-      apt:
-        name: kubectl=1.15.2-00
-        state: present
-        force: yes
-
-    - name: Configure Kubernetes shell autocompletion
+    - name: Install pod network
       become: yes
-      shell: kubectl completion bash > /etc/bash_completion.d/kubectl
+      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+      args:
+        chdir: $HOME
+        creates: pod_network_setup.txt
 
     # Install the Helm package manager along with the Tiller Companion inside the Kubernetes cluster
 

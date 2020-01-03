@@ -6,22 +6,6 @@
 
   # Prepare all Kubernetes nodes for installation
 
-  - name: Remove swapfile from /etc/fstab
-    mount:
-      path: none
-      fstype: swap
-      state: absent
-
-  - name: Disable swap
-    command: swapoff -a
-    when: ansible_swaptotal_mb > 0
-
-  - name: Install Docker
-    apt:
-      name: docker.io
-      state: present
-      update_cache: true
-
   - name: Install GPG
     apt:
       name: gnupg
@@ -47,11 +31,11 @@
 
   - name: Install kubelet
     apt:
-      name: kubelet=1.15.2-00
+      name: kubelet={{ platform.assets.kubernetes.version }}
       state: present
       update_cache: true
 
   - name: Install kubeadm
     apt:
-      name: kubeadm=1.15.2-00
+      name: kubeadm={{ platform.assets.kubernetes.version }}
       state: present

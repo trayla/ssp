@@ -1,4 +1,4 @@
-- hosts: kubernetes
+- hosts: vms
   become: yes
   vars_files:
     - /opt/mgmt/values-ssp.yaml
@@ -11,4 +11,4 @@
         line: "{{ hostvars[item].ansible_host }} {{item}}"
         state: present
       when: hostvars[item].ansible_host is defined
-      with_items: "{{ groups.kubernetes }}"
+      with_items: "{{ groups.vms }}"

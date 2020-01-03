@@ -1,4 +1,4 @@
-- hosts: host
+- hosts: console
   become: yes
   vars_files:
     - /opt/mgmt/values-ssp.yaml

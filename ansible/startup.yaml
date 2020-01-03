@@ -6,13 +6,22 @@
 
   # Wait some time to let the KVM service be started
   - pause:
-      seconds: 60
+      seconds: 30
 
   # Start all virtual machines
   - name: Starting virtual machines
-    shell: '/usr/bin/virsh -c qemu:///system start {{ item }}'
-    when: hostvars[item].ssp_vm is defined
-    with_items: "{{ groups.all }}"
+    shell: '/usr/bin/virsh -c qemu:///system start ssp_{{ item }}'
+    with_items: "{{ groups.vms }}"
+
+  # Wait some time to let the KVM service be started
+  - pause:
+      seconds: 30
+
+- hosts: console
+  become: yes
+  vars_files:
+    - /opt/mgmt/values-ssp.yaml
+  tasks:
 
   # Wait for the Kubernetes cluster to come up
   - name: Wait for the Kubernetes cluster to come up

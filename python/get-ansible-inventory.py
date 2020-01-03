@@ -40,7 +40,11 @@ class Inventory(object):
   def get_inventory(self):
     return {
       'all': {
-        'hosts': [ 'host' ],
+        'hosts': [ 'host', 'console' ],
+        'children': [ 'kubernetes' ]
+      },
+      'vms': {
+        'hosts': [ 'console' ],
         'children': [ 'kubernetes' ]
       },
       'kubernetes': {
@@ -54,25 +58,28 @@ class Inventory(object):
         'hostvars': {
           'host': {
             'ansible_host': 'localhost',
-            'ansible_user': 'root'
+            'ansible_user': 'root',
+            'ansible_ssh_common_args': '-o StrictHostKeyChecking=no'
+          },
+          'console': {
+            'ansible_host': platform_network_ipprefix + '.2',
+            'ansible_user': 'root',
+            'ansible_ssh_common_args': '-o StrictHostKeyChecking=no'
           },
           'kubemaster': {
-            'ansible_host': platform_network_ipprefix + '.110',
+            'ansible_host': platform_network_ipprefix + '.10',
             'ansible_user': 'root',
-            'ansible_ssh_common_args': '-o StrictHostKeyChecking=no',
-            'ssp_vm': 'true'
+            'ansible_ssh_common_args': '-o StrictHostKeyChecking=no'
           },
           'kubenode1': {
-            'ansible_host': platform_network_ipprefix + '.111',
+            'ansible_host': platform_network_ipprefix + '.11',
             'ansible_user': 'root',
-            'ansible_ssh_common_args': '-o StrictHostKeyChecking=no',
-            'ssp_vm': 'true'
+            'ansible_ssh_common_args': '-o StrictHostKeyChecking=no'
           },
           'kubenode2': {
-            'ansible_host': platform_network_ipprefix + '.112',
+            'ansible_host': platform_network_ipprefix + '.12',
             'ansible_user': 'root',
-            'ansible_ssh_common_args': '-o StrictHostKeyChecking=no',
-            'ssp_vm': 'true'
+            'ansible_ssh_common_args': '-o StrictHostKeyChecking=no'
           }
         }
       }

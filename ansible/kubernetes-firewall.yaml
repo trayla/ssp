@@ -1,4 +1,4 @@
-- hosts: host
+- hosts: console
   become: yes
   vars_files:
     - /opt/mgmt/values-ssp.yaml
@@ -24,11 +24,73 @@
     debug:
       msg: 'Nginx ports: http={{ nginx_port_http.stdout }}, https={{ nginx_port_https.stdout }}'
 
-  # Set firewall rules to masquerade the virtual network and forward incoming traffic
-#  - name: Allow forwarding of inbound traffic
-#    shell: |
-#      /sbin/iptables -A POSTROUTING -o eth0 -j MASQUERADE
-#      /sbin/iptables -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination {{ hostvars.kubenode1.ansible_host }}:{{ nginx_port_http.stdout }}
-#      /sbin/iptables -A PREROUTING -p tcp --dport 443 -j DNAT --to-destination {{ hostvars.kubenode1.ansible_host }}:{{ nginx_port_https.stdout }}
-#      /sbin/iptables -I FORWARD -m state -i eth0 --dport 80 --state NEW,RELATED,ESTABLISHED -j ACCEPT
-#      /sbin/iptables -I FORWARD -m state -i eth0 --dport 443 --state NEW,RELATED,ESTABLISHED -j ACCEPT
+  - name: Store the NGINX ports
+    set_fact:
+      nginx_port_http: "{{ nginx_port_http.stdout }}"
+      nginx_port_https: "{{ nginx_port_https.stdout }}"
+
+- hosts: host
+  become: yes
+  vars_files:
+    - /opt/mgmt/values-ssp.yaml
+  tasks:
+
+  # Add port forwardings to the Ingress from the outside world
+
+  - name: "Create port forwarding of http host port to node port {{ hostvars['console'].nginx_port_http }}"
+    iptables:
+      table: nat
+      chain: PREROUTING
+      protocol: tcp
+      destination: '{{ ansible_default_ipv4.address }}'
+      destination_port: '80'
+      jump: DNAT
+      to_destination: "{{ hostvars['kubenode2'].ansible_host }}:{{ hostvars['console'].nginx_port_http }}"
+
+  - name: "Create port forwarding of https host port to node port {{ hostvars['console'].nginx_port_https }}"
+    iptables:
+      table: nat
+      chain: PREROUTING
+      protocol: tcp
+      destination: '{{ ansible_default_ipv4.address }}'
+      destination_port: '443'
+      jump: DNAT
+      to_destination: "{{ hostvars['kubenode2'].ansible_host }}:{{ hostvars['console'].nginx_port_https }}"
+
+  # Permit port forwarding even on localhost
+
+  - name: "Allow port forwarding of http on localhost from host port to node port {{ hostvars['console'].nginx_port_http }}"
+    iptables:
+      table: nat
+      chain: OUTPUT
+      protocol: tcp
+      out_interface: lo
+      destination_port: '80'
+      jump: DNAT
+      to_destination: "{{ hostvars['kubenode2'].ansible_host }}:{{ hostvars['console'].nginx_port_http }}"
+
+  - name: "Create port forwarding of https on localhost from host port to node port {{ hostvars['console'].nginx_port_https }}"
+    iptables:
+      table: nat
+      chain: OUTPUT
+      protocol: tcp
+      out_interface: lo
+      destination_port: '443'
+      jump: DNAT
+      to_destination: "{{ hostvars['kubenode2'].ansible_host }}:{{ hostvars['console'].nginx_port_https }}"
+
+  # Masquerade the Ingress headed HTTP and HTTPS traffic
+
+  - name: Masquerade http and https ports
+    iptables:
+      table: nat
+      chain: POSTROUTING
+      protocol: tcp
+      source: '{{ platform.network.ipprefix }}.0/24'
+      destination: "{{ hostvars['kubenode2'].ansible_host }}/32"
+      match: multiport
+      jump: MASQUERADE
+      destination_port: "{{ hostvars['console'].nginx_port_http }},{{ hostvars['console'].nginx_port_https }}"
+
+  - name: Allow forwarding of inbound traffic
+    shell: '/sbin/iptables -I FORWARD -m state -d {{ platform.network.ipprefix }}.0/24 --state NEW,RELATED,ESTABLISHED -j ACCEPT'

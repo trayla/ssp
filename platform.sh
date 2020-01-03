@@ -5,13 +5,37 @@ BASEDIR=$(dirname "$0")
 IPPREFIX=`$BASEDIR/python/read-value-ipprefix.py`
 ADMINPASSWORD=`$BASEDIR/python/read-value-adminpassword.py`
 
-KUBEMASTER_IPADDR=$IPPREFIX.110
+SSP_PREFIX=ssp
+CONSOLE_IPADDR=$IPPREFIX.2
+KUBEMASTER_IPADDR=$IPPREFIX.10
+CPUS=`grep -c processor /proc/cpuinfo`
+
+function write_title() {
+  echo
+  printf "     *"; for ((i=0; i<${#1}; i++)); do printf "*"; done; printf "*"; echo
+  printf "***** $1 "; for ((i=0; i<`tput cols` - ${#1} - 7; i++));do printf "*"; done; echo
+  echo
+}
+
+function create_console() {
+  # Create the console machine
+  $BASEDIR/scripts/deploy-vm.sh console 4096 2 50G $ADMINPASSWORD $CONSOLE_IPADDR net-tools,openssh-server,aptitude,ansible
+  ssh-keygen -f "/root/.ssh/known_hosts" -R $CONSOLE_IPADDR
+  ssh-keygen -f "/home/sysadm/.ssh/known_hosts" -R $CONSOLE_IPADDR
+}
+
+function create_masternode() {
+  # Create the Kubernetes master
+  $BASEDIR/scripts/deploy-vm.sh kubemaster 2048 2 20G $ADMINPASSWORD $KUBEMASTER_IPADDR net-tools,openssh-server,aptitude
+  ssh-keygen -f "/root/.ssh/known_hosts" -R $KUBEMASTER_IPADDR
+  ssh-keygen -f "/home/sysadm/.ssh/known_hosts" -R $KUBEMASTER_IPADDR
+}
 
 function attach_datadisk () {
   VM=kubenode$1
   DEVICE=$2
   SIZE=$3
-  FILE=/data/data$1/kubenode$1_$2.qcow2
+  FILE=/data/data$1/${SSP_PREFIX}_${VM}_$2.qcow2
 
   if [ -f $FILE ]; then
     echo "Disk image $FILE already exists!"
@@ -24,7 +48,7 @@ function attach_datadisk () {
 
   # Attach the disk to the virtual machine
   echo 'Attaching the newly created disk to the virtual machine ...'
-  virsh attach-disk $VM --source $FILE --target $DEVICE --persistent --subdriver qcow2
+  virsh attach-disk ${SSP_PREFIX}_$VM --source $FILE --target $DEVICE --persistent --subdriver qcow2
 
   # Create a physical volume for the newly attached disk
   echo 'Create a physical volume on the newly created disk ...'
@@ -35,7 +59,7 @@ function create_datanode () {
   IPADDR=$IPPREFIX.$2
 
   # Create the virtual machine
-  $BASEDIR/scripts/deploy-vm.sh kubenode$1 $WORKERSRAM 4 30G $ADMINPASSWORD $IPADDR
+  $BASEDIR/scripts/deploy-vm.sh kubenode$1 $WORKERSRAM $CPUS 30G $ADMINPASSWORD $IPADDR net-tools,openssh-server,aptitude
 
   # Reset locally cached SSH keys for the new virtual machine
   ssh-keygen -f "/root/.ssh/known_hosts" -R $IPADDR
@@ -88,79 +112,98 @@ if [ "$1" == "prepare" ]; then
   ssh-keygen -f /home/sysadm/.ssh/id_rsa -N ""
   chown -R sysadm:sysadm /home/sysadm/.ssh
 
-  # Create the LVM
-  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/host-prepare.yaml
-
 elif [ "$1" == "install" ]; then
   WORKERSRAM=`$BASEDIR/python/read-value-workersram.py`
 
-  # Create the Kubernetes master
-  $BASEDIR/scripts/deploy-vm.sh kubemaster 2048 4 20G $ADMINPASSWORD $KUBEMASTER_IPADDR
-  ssh-keygen -f "/root/.ssh/known_hosts" -R $KUBEMASTER_IPADDR
-  ssh-keygen -f "/home/sysadm/.ssh/known_hosts" -R $KUBEMASTER_IPADDR
+  # Clean the host especially with the Hypervisor environment
+  write_title "Executing ansible/host-cleanup.yaml"
+  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/host-cleanup.yaml
+  rm /vmpool/${SSP_PREFIX}_*
+  rm /data/data1/${SSP_PREFIX}_*
+  rm /data/data2/${SSP_PREFIX}_*
+
+  # Prepare the host especially with the Hypervisor environment
+  write_title "Executing ansible/host-prepare.yaml"
+  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/host-prepare.yaml
+
+  # Create the console machine
+  write_title "Creating console"
+  create_console
+
+  # Create the master node
+  write_title "Creating Kubernetes master node"
+  create_masternode
 
   # Create the first data node
-  create_datanode 1 111
+  write_title "Creating Kubernetes data node 1"
+  create_datanode 1 11
 
   # Create the second data node
-  create_datanode 2 112
+  write_title "Creating Kubernetes data node 2"
+  create_datanode 2 12
 
-  # Add the nodes to the hosts file of each node
-  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-hosts.yaml
+  # Add the nodes to the hosts file of each virtual machine
+  write_title "Executing ansible/hosts.yaml"
+  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/hosts.yaml
 
-  # Prepare all nodes with a basic install like Docker
+  # Install Docker on each virtual machine
+  write_title "Executing ansible/docker.yaml"
+  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/docker.yaml
+
+  # Prepare all Kubernetes nodes with a basic installation
+  write_title "Executing ansible/kubernetes-prepare.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-prepare.yaml
 
-  # Install the master node
-  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-master.yaml
+  # Install the Kubernetes management
+  write_title "Executing ansible/kubernetes-management.yaml"
+  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-management.yaml
 
   # Install the worker nodes
+  write_title "Executing ansible/kubernetes-nodes.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-nodes.yaml
 
   # Install the base components
+  write_title "Executing ansible/kubernetes-base.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-base.yaml
 
-  # Install the GlusterFS Cluster
-  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-gluster.yaml
-
-  # Install Heketi, the storage API for GlusterFS
-  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-heketi.yaml
+  # Install the storage components
+  write_title "Executing ansible/kubernetes-storage.yaml"
+  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-storage.yaml
 
   # Install the Ingress based on Nginx
+  write_title "Executing ansible/kubernetes-nginx.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-nginx.yaml
 
+  # Create port forwarding rules into the Kubernetes cluster
+  write_title "Executing ansible/kubernetes-firewall.yaml"
+  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-firewall.yaml
+
   # Install the monitoring solution
+  write_title "Executing ansible/kubernetes-monitoring.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-monitoring.yaml
 
   # Install Weave
+  write_title "Executing ansible/kubernetes-weave.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-weave.yaml
 
   # Install the Docker Registry
+  write_title "Executing ansible/kubernetes-dockerreg.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-dockerreg.yaml
 
   # Deploy custom namespaces
+  write_title "Executing ansible/kubernetes-customns.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-customns.yaml
 
   # Deploy the Stash backup
+  write_title "Executing kubernetes/stash/pb-install.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/kubernetes/stash/pb-install.yaml
 
-  reboot
-
 elif [ "$1" == "remove" ]; then
-  virsh destroy kubemaster
-  virsh undefine kubemaster
-
-  virsh destroy kubenode1
-  virsh undefine kubenode1
-
-  virsh destroy kubenode2
-  virsh undefine kubenode2
-
-  rm /vmpool/kube*
-  rm /data/data1/kube*
-  rm /data/data2/kube*
-
-  reboot
+  # Clean the host especially with the Hypervisor environment
+  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/host-cleanup.yaml
+  rm /vmpool/${SSP_PREFIX}_*
+  rm /data/data1/${SSP_PREFIX}_*
+  rm /data/data2/${SSP_PREFIX}_*
 
 elif [ "$1" == "add-disk" ]; then
   add_disk 1 $2
@@ -173,4 +216,5 @@ else
   echo "  platform.sh install"
   echo "  platform.sh add-disk vd[c-z]"
   echo "  platform.sh remove"
+
 fi

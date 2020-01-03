@@ -1,0 +1,25 @@
+- hosts: vms
+  become: yes
+  vars_files:
+    - /opt/mgmt/values-ssp.yaml
+  tasks:
+
+    # Disable Swap files because these are not supported on Docker hosts
+
+    - name: Remove swapfile from /etc/fstab
+      mount:
+        path: none
+        fstype: swap
+        state: absent
+
+    - name: Disable swap
+      command: swapoff -a
+      when: ansible_swaptotal_mb > 0
+
+    # Install Docker
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: true
