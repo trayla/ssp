@@ -18,6 +18,11 @@ platform:
   workers:
     ram: 4096
 
+  # The storage settings
+  storage:
+    data:
+      size: 300G
+
   # The network settings
   network:
     ipprefix: 10.99.99

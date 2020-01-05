@@ -214,10 +214,7 @@
                       "zone": 1
                     },
                     "devices": [
-                      "/dev/vdb",
-                      "/dev/vdc",
-                      "/dev/vdd",
-                      "/dev/vde"
+                      "/dev/vgdata/lvdata"
                     ]
                   },
                   {
@@ -233,10 +230,7 @@
                       "zone": 1
                     },
                     "devices": [
-                      "/dev/vdb",
-                      "/dev/vdc",
-                      "/dev/vdd",
-                      "/dev/vde"
+                      "/dev/vgdata/lvdata"
                     ]
                   }
                 ]

@@ -4,6 +4,7 @@ BASEDIR=$(dirname "$0")
 
 IPPREFIX=`$BASEDIR/python/read-value-ipprefix.py`
 ADMINPASSWORD=`$BASEDIR/python/read-value-adminpassword.py`
+STORAGEDATASIZE=`$BASEDIR/python/read-value-storagedatasize.py`
 
 SSP_PREFIX=ssp
 CONSOLE_IPADDR=$IPPREFIX.2
@@ -69,21 +70,24 @@ function create_datanode () {
   ansible kubenode$1 -i $BASEDIR/python/get-ansible-inventory.py -a "apt install -y lvm2 xfsprogs software-properties-common"
 
   # Attach the first data disks
-  attach_datadisk $1 vdb 200G
-  attach_datadisk $1 vdc 200G
-  attach_datadisk $1 vdd 200G
-  attach_datadisk $1 vde 200G
+  attach_datadisk $1 vdb $STORAGEDATASIZE
+
+  # Create the data volume group
+  ansible kubenode$1 -i $BASEDIR/python/get-ansible-inventory.py -a "vgcreate vgdata /dev/vdb"
+
+  # Create the data logical volume
+  ansible kubenode$1 -i $BASEDIR/python/get-ansible-inventory.py -a "lvcreate -n lvdata -l 100%FREE vgdata"
 }
 
 function add_disk () {
   # Attach a new disk
   attach_datadisk $1 $2 100G
 
-  # Add the new physical volume to the volume group
-  ansible kubenode$1 -i $BASEDIR/python/get-ansible-inventory.py -a "vgextend vg0 /dev/$2"
+  # Add the new physical volume to the data volume group
+  ansible kubenode$1 -i $BASEDIR/python/get-ansible-inventory.py -a "vgextend vgdata /dev/$2"
 
-  # Add the new physical volume to the logical volume
-  ansible kubenode$1 -i $BASEDIR/python/get-ansible-inventory.py -a "lvextend /dev/vg0/lv0 /dev/$2 -r"
+  # Resize the logical data volume to the maximum available space
+  ansible kubenode$1 -i $BASEDIR/python/get-ansible-inventory.py -a "lvextend -l +100%FREE /dev/vgdata/lvdata"
 }
 
 if [ "$EUID" -ne 0 ]
@@ -214,7 +218,7 @@ else
   echo "Usage:"
   echo "  platform.sh prepare"
   echo "  platform.sh install"
-  echo "  platform.sh add-disk vd[c-z]"
+  echo "  platform.sh add-disk vd[e-z]"
   echo "  platform.sh remove"
 
 fi
