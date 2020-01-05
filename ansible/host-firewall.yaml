@@ -1,0 +1,30 @@
+- hosts: host
+  become: yes
+  vars_files:
+    - /opt/mgmt/values-ssp.yaml
+  tasks:
+
+  # Masquerade the virtual machine network
+
+  - name: Masquerade http and https ports
+    iptables:
+      table: nat
+      chain: POSTROUTING
+      protocol: tcp
+      source: '{{ platform.network.ipprefix }}.0/24'
+      jump: MASQUERADE
+
+  - name: Allow forwarding of inbound traffic
+    shell: '/sbin/iptables -I FORWARD -m state -d {{ platform.network.ipprefix }}.0/24 --state NEW,RELATED,ESTABLISHED -j ACCEPT'
+
+  # Add port forwardings
+
+  - name: "Create port forwarding of SSH traffic to the console"
+    iptables:
+      table: nat
+      chain: PREROUTING
+      protocol: tcp
+      destination: '{{ ansible_default_ipv4.address }}'
+      destination_port: '2222'
+      jump: DNAT
+      to_destination: "{{ hostvars['console'].ansible_host }}:22"

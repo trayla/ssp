@@ -178,6 +178,10 @@ elif [ "$1" == "install" ]; then
   write_title "Executing ansible/kubernetes-nginx.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-nginx.yaml
 
+  # Define the host firewall
+  write_title "Executing ansible/host-firewall.yaml"
+  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/host-firewall.yaml
+
   # Create port forwarding rules into the Kubernetes cluster
   write_title "Executing ansible/kubernetes-firewall.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-firewall.yaml

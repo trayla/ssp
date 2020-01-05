@@ -31,6 +31,10 @@
     retries: 50
     delay: 10
 
+# Include host firewall settings
+- name: Include the host firewall settings
+  import_playbook: host-firewall.yaml
+
 # Include Kubernetes firewall settings
 - name: Include the Kubernetes firewall settings
   import_playbook: kubernetes-firewall.yaml

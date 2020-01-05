@@ -78,19 +78,3 @@
       destination_port: '443'
       jump: DNAT
       to_destination: "{{ hostvars['kubenode2'].ansible_host }}:{{ hostvars['console'].nginx_port_https }}"
-
-  # Masquerade the Ingress headed HTTP and HTTPS traffic
-
-  - name: Masquerade http and https ports
-    iptables:
-      table: nat
-      chain: POSTROUTING
-      protocol: tcp
-      source: '{{ platform.network.ipprefix }}.0/24'
-      destination: "{{ hostvars['kubenode2'].ansible_host }}/32"
-      match: multiport
-      jump: MASQUERADE
-      destination_port: "{{ hostvars['console'].nginx_port_http }},{{ hostvars['console'].nginx_port_https }}"
-
-  - name: Allow forwarding of inbound traffic
-    shell: '/sbin/iptables -I FORWARD -m state -d {{ platform.network.ipprefix }}.0/24 --state NEW,RELATED,ESTABLISHED -j ACCEPT'
