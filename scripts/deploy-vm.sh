@@ -74,7 +74,7 @@ virt-install \
   --os-type linux \
   --os-variant ubuntu17.10 \
   --graphics none \
-  --network bridge=virbr0,model=virtio \
+  --network bridge=virbr1,model=virtio \
   --noautoconsole
 
 sleep 20
