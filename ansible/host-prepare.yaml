@@ -4,31 +4,6 @@
   become: yes
   tasks:
 
-    # Enable the host firewall
-  
-    - name: Deny incoming traffic by default
-      ufw:
-        default: deny
-        direction: incoming
-
-    - name: Allow incoming SSH traffic
-      ufw:
-        rule: allow
-        proto: tcp
-        port: '22'
-
-    - name: Enable UFW firewall settings
-      ufw:
-        state: enabled
-
-    # Install neceassry software
-
-    - name: Install necessary packages
-      apt:
-        name: qemu-kvm,libvirt-clients,libvirt-daemon-system,bridge-utils,virt-manager,libguestfs-tools,virt-top,sysstat,apt-transport-https,ca-certificates,curl,software-properties-common,python-lxml,python3-lxml,python-libvirt,python3-libvirt,python-pip
-        state: present
-        update_cache: true
-
     # Create the storage pools
 
     - name: Create the directory for the default storage pool
