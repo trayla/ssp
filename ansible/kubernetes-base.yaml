@@ -8,7 +8,7 @@
 
     - name: Install pod network
       become: yes
-      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+      shell: kubectl apply -f /opt/mgmt/ssp/kubernetes/canal/canal.yaml
       args:
         chdir: $HOME
         creates: pod_network_setup.txt
@@ -42,7 +42,7 @@
       shell: kubectl get pods --namespace kube-system -l name=tiller
       register: kubectl_kube_system_pods
       until: kubectl_kube_system_pods.stdout.find("Running") != -1
-      retries: 5
+      retries: 30
       delay: 10
 
     # Install the base components
