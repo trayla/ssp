@@ -20,14 +20,14 @@ function write_title() {
 
 function create_console() {
   # Create the console machine
-  $BASEDIR/scripts/deploy-vm.sh console 4096 2 50G $ADMINPASSWORD $CONSOLE_IPADDR net-tools,openssh-server,aptitude,ansible
+  $BASEDIR/scripts/deploy-vm.sh console 4096 2 50G $ADMINPASSWORD $CONSOLE_IPADDR net-tools,openssh-server,aptitude,ansible,curl
   ssh-keygen -f "/root/.ssh/known_hosts" -R $CONSOLE_IPADDR
   ssh-keygen -f "/home/sysadm/.ssh/known_hosts" -R $CONSOLE_IPADDR
 }
 
 function create_masternode() {
   # Create the Kubernetes master
-  $BASEDIR/scripts/deploy-vm.sh kubemaster 2048 2 20G $ADMINPASSWORD $KUBEMASTER_IPADDR net-tools,openssh-server,aptitude
+  $BASEDIR/scripts/deploy-vm.sh kubemaster 2048 2 20G $ADMINPASSWORD $KUBEMASTER_IPADDR net-tools,openssh-server,aptitude,curl
   ssh-keygen -f "/root/.ssh/known_hosts" -R $KUBEMASTER_IPADDR
   ssh-keygen -f "/home/sysadm/.ssh/known_hosts" -R $KUBEMASTER_IPADDR
 }
