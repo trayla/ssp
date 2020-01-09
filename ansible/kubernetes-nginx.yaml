@@ -7,10 +7,10 @@
   # Install the NGINX web proxy via it's officially supported Helm package
 
   - name: Install prerequisites of the NGINX ingress
-    shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.26.1/deploy/static/mandatory.yaml
+    shell: "kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-{{ platform.assets.nginx.version }}/deploy/static/mandatory.yaml"
 
   - name: Install the NGINX Helm package
-    shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.26.1/deploy/static/provider/baremetal/service-nodeport.yaml
+    shell: "kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-{{ platform.assets.nginx.version }}/deploy/static/provider/baremetal/service-nodeport.yaml"
 
   # Install Cert Manager
 
@@ -18,7 +18,7 @@
     shell: kubectl create namespace certmgr
 
   - name: Install custom ressource definitions
-    shell: kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.12/deploy/manifests/00-crds.yaml
+    shell: "kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-{{ platform.assets.certmanager.version.split('.')[0] }}.{{ platform.assets.certmanager.version.split('.')[1] }}/deploy/manifests/00-crds.yaml"
 
   - name: Disable the automatic validation feature on the Cert Manager namespace
     shell: kubectl label namespace certmgr certmanager.k8s.io/disable-validation="true"
@@ -69,7 +69,7 @@
     shell: helm repo add jetstack https://charts.jetstack.io
 
   - name: Install the Cert Manager via it's Helm package
-    shell: helm install --name certmanager --namespace certmgr --version v0.12.0 jetstack/cert-manager --set ingressShim.defaultIssuerKind=ClusterIssuer,ingressShim.defaultIssuerName=letsencrypt-staging,ingressShim.defaultACMEChallengeType=http01
+    shell: "helm install --name certmanager --namespace certmgr --version v{{ platform.assets.certmanager.version }} jetstack/cert-manager --set ingressShim.defaultIssuerKind=ClusterIssuer,ingressShim.defaultIssuerName=letsencrypt-staging,ingressShim.defaultACMEChallengeType=http01"
 
   # Deploy the Echo service
 

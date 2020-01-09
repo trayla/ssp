@@ -8,7 +8,7 @@
 
     - name: Install pod network
       become: yes
-      shell: kubectl apply -f /opt/mgmt/ssp/kubernetes/canal/canal.yaml
+      shell: "kubectl apply -f https://docs.projectcalico.org/v{{ platform.assets.calico.version }}/manifests/calico.yaml"
       args:
         chdir: $HOME
         creates: pod_network_setup.txt
@@ -66,7 +66,7 @@
         chdir: $HOME
 
     - name: Updating the Istio sidecar injector
-      shell: kubectl apply -f https://docs.projectcalico.org/v3.11/manifests/alp/istio-inject-configmap-{{ platform.assets.istio.version }}.yaml
+      shell: "kubectl apply -f https://docs.projectcalico.org/v{{ platform.assets.calico.version }}/manifests/alp/istio-inject-configmap-{{ platform.assets.istio.version }}.yaml"
 
     - name: Adding Calico authorization services to the mesh
       shell: kubectl apply -f https://docs.projectcalico.org/v{{ platform.assets.calico.version }}/manifests/alp/istio-app-layer-policy.yaml

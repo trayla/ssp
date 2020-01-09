@@ -8,6 +8,7 @@ STORAGEDATASIZE=`$BASEDIR/python/read-value-storagedatasize.py`
 
 SSP_PREFIX=ssp
 CONSOLE_IPADDR=$IPPREFIX.2
+HEKETI_IPADDR=$IPPREFIX.9
 KUBEMASTER_IPADDR=$IPPREFIX.10
 CPUS=`grep -c processor /proc/cpuinfo`
 
@@ -23,6 +24,13 @@ function create_console() {
   $BASEDIR/scripts/deploy-vm.sh console 4096 2 50G $ADMINPASSWORD $CONSOLE_IPADDR net-tools,openssh-server,aptitude,ansible,curl
   ssh-keygen -f "/root/.ssh/known_hosts" -R $CONSOLE_IPADDR
   ssh-keygen -f "/home/sysadm/.ssh/known_hosts" -R $CONSOLE_IPADDR
+}
+
+function create_heketi() {
+  # Create the Heketi machine
+  $BASEDIR/scripts/deploy-vm.sh heketi 1024 1 20G $ADMINPASSWORD $HEKETI_IPADDR net-tools,openssh-server,aptitude,curl
+  ssh-keygen -f "/root/.ssh/known_hosts" -R $HEKETI_IPADDR
+  ssh-keygen -f "/home/sysadm/.ssh/known_hosts" -R $HEKETI_IPADDR
 }
 
 function create_masternode() {
@@ -137,6 +145,10 @@ elif [ "$1" == "install" ]; then
   # Create the console machine
   write_title "Creating console"
   create_console
+
+  # Create the Heketi machine
+  write_title "Creating Heketi"
+  create_heketi
 
   # Create the master node
   write_title "Creating Kubernetes master node"

@@ -54,7 +54,7 @@
       with_items: "{{ groups.kubenodes }}"
 
 # Install the Heketi service
-- hosts: kubemaster
+- hosts: heketi
   become: yes
   vars_files:
     - /opt/mgmt/values-ssp.yaml
@@ -113,7 +113,7 @@
 
     - name: Download and unpack the Heketi deployment
       unarchive:
-        src: https://github.com/heketi/heketi/releases/download/v9.0.0/heketi-v9.0.0.linux.amd64.tar.gz
+        src: "https://github.com/heketi/heketi/releases/download/v{{ platform.assets.heketi.version }}/heketi-v{{ platform.assets.heketi.version }}.linux.amd64.tar.gz"
         dest: /tmp
         remote_src: yes
 
@@ -245,13 +245,13 @@
     - /opt/mgmt/values-ssp.yaml
   tasks:
 
-    - shell: "echo '{{ hostvars['kubemaster'].heketi_rsa_key_pub }}' > /tmp/key"
+    - shell: "echo '{{ hostvars['heketi'].heketi_rsa_key_pub }}' > /tmp/key"
 
     - name: Share the Heketi SSH key on every storage node
       authorized_key:
         user: root
         state: present
-        key: "{{ hostvars['kubemaster'].heketi_rsa_key_pub }}"
+        key: "{{ hostvars['heketi'].heketi_rsa_key_pub }}"
 
     - name: Restart the SSH daemon
       systemd:
@@ -260,7 +260,7 @@
         name: sshd
 
 # Instantiate the Heketi service
-- hosts: kubemaster
+- hosts: heketi
   become: yes
   vars_files:
     - /opt/mgmt/values-ssp.yaml
@@ -269,7 +269,7 @@
     - name: Initialize Heketi with the storage topology
       shell: "/usr/local/bin/heketi-cli topology load --json=/etc/heketi/topology.json"
       environment:
-        HEKETI_CLI_SERVER: "http://{{ hostvars['kubemaster']['ansible_default_ipv4']['address'] }}:8080"
+        HEKETI_CLI_SERVER: "http://{{ hostvars['heketi']['ansible_default_ipv4']['address'] }}:8080"
         HEKETI_CLI_USER: "admin"
         HEKETI_CLI_KEY: "{{ platform.admin.password  }}"
 
@@ -367,7 +367,7 @@
             storageclass.kubernetes.io/is-default-class: "true"
         provisioner: kubernetes.io/glusterfs
         parameters:
-          resturl: "http://{{ hostvars['kubemaster']['ansible_default_ipv4']['address'] }}:8080"
+          resturl: "http://{{ hostvars['heketi']['ansible_default_ipv4']['address'] }}:8080"
           restuser: admin
           secretName: heketi-login
           secretNamespace: ssp-base

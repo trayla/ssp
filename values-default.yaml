@@ -7,6 +7,12 @@ platform:
       version: 3.11
     istio:
       version: 1.3.5
+    nginx:
+      version: 0.26.1
+    certmanager:
+      version: 0.12.0
+    heketi:
+      version: 9.0.0
 
   # Your domain, the platform should be reachable through
   domain: example.com

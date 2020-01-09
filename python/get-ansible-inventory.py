@@ -40,11 +40,11 @@ class Inventory(object):
   def get_inventory(self):
     return {
       'all': {
-        'hosts': [ 'host', 'console' ],
+        'hosts': [ 'host', 'console', 'heketi' ],
         'children': [ 'kubernetes' ]
       },
       'vms': {
-        'hosts': [ 'console' ],
+        'hosts': [ 'console', 'heketi' ],
         'children': [ 'kubernetes' ]
       },
       'kubernetes': {
@@ -63,6 +63,11 @@ class Inventory(object):
           },
           'console': {
             'ansible_host': platform_network_ipprefix + '.2',
+            'ansible_user': 'root',
+            'ansible_ssh_common_args': '-o StrictHostKeyChecking=no'
+          },
+          'heketi': {
+            'ansible_host': platform_network_ipprefix + '.9',
             'ansible_user': 'root',
             'ansible_ssh_common_args': '-o StrictHostKeyChecking=no'
           },
