@@ -2,6 +2,9 @@
 
 BASEDIR=$(dirname "$0")
 
+# Install Linux packages which are necessary to determine configuration parameters
+apt install python-pip -y && pip install pyyaml
+
 IPPREFIX=`$BASEDIR/python/read-value-ipprefix.py`
 ADMINPASSWORD=`$BASEDIR/python/read-value-adminpassword.py`
 STORAGEDATASIZE=`$BASEDIR/python/read-value-storagedatasize.py`

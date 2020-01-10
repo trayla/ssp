@@ -11,8 +11,4 @@
       shell: helm repo update
 
     - name: Install the Stash operator via it's Helm chart
-      shell: helm install appscode/stash --namespace ssp-base --name backup-operator --version v0.9.0-rc.2
-
-    - name: Create an encryption secret for the backup
-      shell: echo -n '{{ platform.admin.password }}' > /tmp/RESTIC_PASSWORD && kubectl -n {{ item.name }} create secret generic backup-encryption --from-file=/tmp/RESTIC_PASSWORD && rm /tmp/RESTIC_PASSWORD
-      loop: "{{ custom.namespaces }}"
+      shell: "helm install appscode/stash --namespace ssp-base --name backup-operator --version v{{ platform.assets.stash.version }}"

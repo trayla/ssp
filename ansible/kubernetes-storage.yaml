@@ -29,7 +29,7 @@
 
     - name: Add the Gluster Apt repository
       apt_repository:
-        repo: 'ppa:gluster/glusterfs-6'
+        repo: "ppa:gluster/glusterfs-{{ platform.assets.glusterfs.version }}"
 
     - name: Install GlusterFS server
       apt:

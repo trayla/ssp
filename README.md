@@ -17,12 +17,6 @@
 
 ### Necessary preliminaries
 
-Install necessery packages:
-
-~~~~ShellSession
-apt install python-pip -y && pip install pyyaml
-~~~~
-
 #### Storage
 
 Your system has to provide three directories which will be used as KVM storage pools and therefore populated with disk images for the upcoming virtual machines. The following directories have to be create prior to the start of the installation procedure. 
