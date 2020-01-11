@@ -4,6 +4,8 @@
     - /opt/mgmt/values-ssp.yaml
   tasks:
 
+    # Install the Stash operator
+
     - name: Add the AppsCode Helm repository
       shell: helm repo add appscode https://charts.appscode.com/stable/
 
@@ -12,3 +14,11 @@
 
     - name: Install the Stash operator via it's Helm chart
       shell: "helm install appscode/stash --namespace ssp-base --name backup-operator --version v{{ platform.assets.stash.version }}"
+
+    # Install the Stash command line tools
+
+    - name: Install the Stash kubectl plugin
+      shell: |
+        wget -O kubectl-stash https://github.com/stashed/cli/releases/download/v{{ platform.assets.stashcli.version }}/kubectl-stash-linux-amd64
+        chmod +x kubectl-stash
+        mv kubectl-stash /usr/local/bin/

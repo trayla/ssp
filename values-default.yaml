@@ -17,6 +17,8 @@ platform:
       version: 6
     stash:
       version: 0.9.0-rc.2
+    stashcli:
+      version: 0.2.0
 
   # Your domain, the platform should be reachable through
   domain: example.com

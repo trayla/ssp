@@ -45,7 +45,7 @@
       destination: '{{ ansible_default_ipv4.address }}'
       destination_port: '80'
       jump: DNAT
-      to_destination: "{{ hostvars['kubenode2'].ansible_host }}:{{ hostvars['console'].nginx_port_http }}"
+      to_destination: "{{ hostvars['kubenode1'].ansible_host }}:{{ hostvars['console'].nginx_port_http }}"
 
   - name: "Create port forwarding of https host port to node port {{ hostvars['console'].nginx_port_https }}"
     iptables:
@@ -55,7 +55,7 @@
       destination: '{{ ansible_default_ipv4.address }}'
       destination_port: '443'
       jump: DNAT
-      to_destination: "{{ hostvars['kubenode2'].ansible_host }}:{{ hostvars['console'].nginx_port_https }}"
+      to_destination: "{{ hostvars['kubenode1'].ansible_host }}:{{ hostvars['console'].nginx_port_https }}"
 
   # Permit port forwarding even on localhost
 
@@ -67,7 +67,7 @@
       out_interface: lo
       destination_port: '80'
       jump: DNAT
-      to_destination: "{{ hostvars['kubenode2'].ansible_host }}:{{ hostvars['console'].nginx_port_http }}"
+      to_destination: "{{ hostvars['kubenode1'].ansible_host }}:{{ hostvars['console'].nginx_port_http }}"
 
   - name: "Create port forwarding of https on localhost from host port to node port {{ hostvars['console'].nginx_port_https }}"
     iptables:
@@ -77,4 +77,4 @@
       out_interface: lo
       destination_port: '443'
       jump: DNAT
-      to_destination: "{{ hostvars['kubenode2'].ansible_host }}:{{ hostvars['console'].nginx_port_https }}"
+      to_destination: "{{ hostvars['kubenode1'].ansible_host }}:{{ hostvars['console'].nginx_port_https }}"

@@ -71,7 +71,7 @@ function create_datanode () {
   IPADDR=$IPPREFIX.$2
 
   # Create the virtual machine
-  $BASEDIR/scripts/deploy-vm.sh kubenode$1 $WORKERSRAM $CPUS 30G $ADMINPASSWORD $IPADDR net-tools,openssh-server,aptitude
+  $BASEDIR/scripts/deploy-vm.sh kubenode$1 $WORKERSRAM $CPUS 30G $ADMINPASSWORD $IPADDR net-tools,openssh-server,aptitude,curl
 
   # Reset locally cached SSH keys for the new virtual machine
   ssh-keygen -f "/root/.ssh/known_hosts" -R $IPADDR
@@ -223,7 +223,7 @@ elif [ "$1" == "install" ]; then
 
   # Deploy the Stash backup
   write_title "Executing kubernetes/stash/pb-install.yaml"
-  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/kubernetes/stash/pb-install.yaml
+  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-backup.yaml
 
 elif [ "$1" == "remove" ]; then
   # Clean the host especially with the Hypervisor environment
