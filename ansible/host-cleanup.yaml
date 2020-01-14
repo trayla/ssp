@@ -12,6 +12,7 @@
         name: "{{ item }}"
       with_items:
         - ssp_console
+        - ssp_heketi
         - ssp_kubemaster
         - ssp_kubenode1
         - ssp_kubenode2
@@ -23,6 +24,7 @@
         name: "{{ item }}"
       with_items:
         - ssp_console
+        - ssp_heketi
         - ssp_kubemaster
         - ssp_kubenode1
         - ssp_kubenode2

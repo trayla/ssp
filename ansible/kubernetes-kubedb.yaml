@@ -1,0 +1,31 @@
+- hosts: console
+  become: yes
+  vars_files:
+    - /opt/mgmt/values-ssp.yaml
+  tasks:
+
+    # Install the KubeDB operator
+
+    - name: Add the AppsCode Helm repository
+      shell: helm repo add appscode https://charts.appscode.com/stable/
+
+    - name: Update the local Helm repository
+      shell: helm repo update
+
+    - name: Install the KubeDB operator via it's Helm chart
+      shell: "helm install appscode/kubedb --namespace ssp-base --name kubedb-operator --version v{{ platform.assets.kubedb.version }}"
+
+    - name: Wait some seconds for registration of all CRD's
+      pause:
+        seconds: 10
+
+    - name: Install KubeDB catalog of database versions
+      shell: "helm install appscode/kubedb-catalog --name kubedb-catalog --version v{{ platform.assets.kubedb.version }} --namespace kube-system"
+
+    # Install the KubeDB command line tool
+
+    - name: Install the KubeDB command line tool
+      shell: |
+        wget -O kubedb https://github.com/kubedb/cli/releases/download/v{{ platform.assets.kubedb.version }}/kubedb-linux-amd64
+        chmod +x kubedb
+        mv kubedb /usr/local/bin/
