@@ -171,3 +171,10 @@
     - name: Configure Kubernetes shell autocompletion
       become: yes
       shell: kubectl completion bash > /etc/bash_completion.d/kubectl
+
+    # Install Stern for enhanced log display
+
+    - name: Install Stern
+      shell: |
+        wget https://github.com/wercker/stern/releases/download/{{ platform.assets.stern.version }}/stern_linux_amd64 -O /usr/bin/stern
+        chmod a+x /usr/bin/stern
