@@ -13,7 +13,28 @@
       shell: helm repo update
 
     - name: Install the Stash operator via it's Helm chart
-      shell: "helm install appscode/stash --namespace ssp-base --name backup-operator --version v{{ platform.assets.stash.version }}"
+      shell: |
+        helm install appscode/stash --name stash-operator \
+          --version {{ platform.assets.stash.version }} \
+          --namespace ssp-base
+
+    # Install specific Stash operators
+
+    - name: Wait some time
+      wait_for:
+        timeout: 60
+
+    - name: Install the Stash MongoDB support
+      shell: |
+        curl -fsSL https://github.com/stashed/catalog/raw/{{ platform.assets.stash.catalog.version }}/deploy/helm2.sh | bash -s -- --catalog=stash-mongodb
+
+    - name: Install the Stash Postgres support
+      shell: |
+        curl -fsSL https://github.com/stashed/catalog/raw/{{ platform.assets.stash.catalog.version }}/deploy/helm2.sh | bash -s -- --catalog=stash-postgres
+
+    - name: Install the Stash MySQL support
+      shell: |
+        curl -fsSL https://github.com/stashed/catalog/raw/{{ platform.assets.stash.catalog.version }}/deploy/helm2.sh | bash -s -- --catalog=stash-mysql
 
     # Install the Stash command line tools
 

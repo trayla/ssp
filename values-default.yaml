@@ -16,7 +16,9 @@ platform:
     glusterfs:
       version: 6
     stash:
-      version: 0.9.0-rc.2
+      version: v0.9.0-rc.4
+      catalog:
+        version: v0.2.0
     stashcli:
       version: 0.2.0
     kubedb:

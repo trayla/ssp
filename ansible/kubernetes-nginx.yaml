@@ -69,7 +69,7 @@
     shell: helm repo add jetstack https://charts.jetstack.io
 
   - name: Install the Cert Manager via it's Helm package
-    shell: "helm install --name certmanager --namespace certmgr --version v{{ platform.assets.certmanager.version }} jetstack/cert-manager --set ingressShim.defaultIssuerKind=ClusterIssuer,ingressShim.defaultIssuerName=letsencrypt-staging,ingressShim.defaultACMEChallengeType=http01"
+    shell: "helm install --name certmanager --namespace certmgr --version v{{ platform.assets.certmanager.version }} jetstack/cert-manager --set ingressShim.defaultIssuerKind=ClusterIssuer,ingressShim.defaultIssuerName=letsencrypt-production,ingressShim.defaultACMEChallengeType=http01"
 
   # Deploy the Echo service
 

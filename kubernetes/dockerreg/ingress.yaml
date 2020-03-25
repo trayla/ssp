@@ -11,13 +11,13 @@ metadata:
     nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
 spec:
   tls:
-  - hosts:
-    - dockerreg.ssp.{{ platform.domain }}
-    secretName: letsencrypt-production
+    - hosts:
+        - dockerreg.ssp.{{ platform.domain }}
+      secretName: letsencrypt-production
   rules:
-  - host: dockerreg.ssp.{{ platform.domain }}
-    http:
-      paths:
-      - backend:
-          serviceName: dockerreg-p
-          servicePort: 5000
+    - host: dockerreg.ssp.{{ platform.domain }}
+      http:
+        paths:
+          - backend:
+              serviceName: dockerreg-p
+              servicePort: 5000
