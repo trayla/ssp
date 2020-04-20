@@ -1,8 +1,0 @@
-- hosts: host
-  become: yes
-  vars_files:
-    - /opt/mgmt/values-ssp.yaml
-  tasks:
-
-    - name: Install the WEBDAV server
-      shell: helm install --namespace ssp-base --name files-p --values /opt/mgmt/values-ssp.yaml /opt/mgmt/ssp/kubernetes/files
