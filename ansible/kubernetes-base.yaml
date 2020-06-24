@@ -38,70 +38,54 @@
         insertafter=EOF
         create=True
 
-    - name: Waiting for Calico to come up
-      shell: kubectl exec -i -n kube-system calicoctl /calicoctl -- get felixconfiguration default --export -o yaml
-      register: calicoctl_output
-      until: calicoctl_output.stdout.find("FelixConfiguration") != -1
-      retries: 30
-      delay: 10
+#    - name: Waiting for Calico to come up
+#      shell: kubectl exec -i -n kube-system calicoctl /calicoctl -- get felixconfiguration default --export -o yaml
+#      register: calicoctl_output
+#      until: calicoctl_output.stdout.find("FelixConfiguration") != -1
+#      retries: 300
+#      delay: 10
 
-    - name: Enabling application layer policy
-      shell: |
-        kubectl exec -i -n kube-system calicoctl /calicoctl -- get felixconfiguration default --export -o yaml | sed -e '/  policySyncPathPrefix:/d' \-e '$ a\  policySyncPathPrefix: /var/run/nodeagent' > felix-config.yaml
-        kubectl exec -i -n kube-system calicoctl /calicoctl -- apply -f - < felix-config.yaml
-      args:
-        executable: /bin/bash
-        chdir: $HOME
+#    - name: Enabling application layer policy
+#      shell: |
+#        kubectl exec -i -n kube-system calicoctl /calicoctl -- get felixconfiguration default --export -o yaml | sed -e '/  policySyncPathPrefix:/d' \-e '$ a\  policySyncPathPrefix: /var/run/nodeagent' > felix-config.yaml
+#        kubectl exec -i -n kube-system calicoctl /calicoctl -- apply -f - < felix-config.yaml
+#      args:
+#        executable: /bin/bash
+#        chdir: $HOME
 
     # Install Istio
 
-    - name: Install Istio
-      shell: |
-        curl -L https://git.io/getLatestIstio | ISTIO_VERSION={{ platform.assets.istio.version }} sh -
-        cd $(ls -d istio-*)
-        kubectl apply -f install/kubernetes/helm/istio-init/files/
-        kubectl apply -f install/kubernetes/istio-demo-auth.yaml
-      args:
-        executable: /bin/bash
-        chdir: $HOME
+#    - name: Install Istio
+#      shell: |
+#        curl -L https://git.io/getLatestIstio | ISTIO_VERSION={{ platform.assets.istio.version }} sh -
+#        cd $(ls -d istio-*)
+#        kubectl apply -f install/kubernetes/helm/istio-init/files/
+#        kubectl apply -f install/kubernetes/istio-demo-auth.yaml
+#      args:
+#        executable: /bin/bash
+#        chdir: $HOME
 
-    - name: Updating the Istio sidecar injector
-      shell: "kubectl apply -f https://docs.projectcalico.org/v{{ platform.assets.calico.version }}/manifests/alp/istio-inject-configmap-{{ platform.assets.istio.version }}.yaml"
+#    - name: Updating the Istio sidecar injector
+#      shell: "kubectl apply -f https://docs.projectcalico.org/v{{ platform.assets.calico.version }}/manifests/alp/istio-inject-configmap-{{ platform.assets.istio.version }}.yaml"
 
-    - name: Adding Calico authorization services to the mesh
-      shell: kubectl apply -f https://docs.projectcalico.org/v{{ platform.assets.calico.version }}/manifests/alp/istio-app-layer-policy.yaml
+#    - name: Adding Calico authorization services to the mesh
+#      shell: kubectl apply -f https://docs.projectcalico.org/v{{ platform.assets.calico.version }}/manifests/alp/istio-app-layer-policy.yaml
 
     # Install the Helm package manager along with the Tiller Companion inside the Kubernetes cluster
 
     - name: Download the Helm package manager
       get_url:
-        url: https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get
-        dest: /tmp/install-helm.sh
-        mode: '0755'
+        url: https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+        dest: /tmp/get-helm.sh
+        mode: '0700'
 
     - name: Install Helm
-      shell: /tmp/install-helm.sh
+      shell: /tmp/get-helm.sh
 
-    - name: Create a service account for Tiller
-      shell: kubectl -n kube-system delete serviceaccounts tiller --ignore-not-found=true && kubectl -n kube-system create serviceaccount tiller
-
-    - name: Create a cluster role binding for Tiller
-      shell: kubectl -n kube-system delete clusterrolebinding tiller --ignore-not-found=true && kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
-
-    - name: Initialize Helm and the Tiller companion inside the Kubernetes cluster
-      shell: helm init --service-account tiller
-      register: helm_init_result
-
-    - name: Show Helm init result
-      debug:
-        msg: "{{ helm_init_result.stdout_lines }}"
-
-    - name: Ensure that Tiller is running
-      shell: kubectl get pods --namespace kube-system -l name=tiller
-      register: kubectl_kube_system_pods
-      until: kubectl_kube_system_pods.stdout.find("Running") != -1
-      retries: 30
-      delay: 10
+    - name: Install the Google Stable helm repository
+      shell: |
+        helm repo add stable https://kubernetes-charts.storage.googleapis.com
+        helm repo update
 
     # Install the base components
 

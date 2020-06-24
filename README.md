@@ -10,8 +10,8 @@
 
 ### Knowledge
 
-- A understanding of Linux based system management and command line tools
-- A understanding of virtualization with KVM
+- An understanding of Linux based system management and command line tools
+- An understanding of virtualization with KVM
 - Knowledge about operating a Kubernetes platform
 - A basic understanding about Gluster
 
@@ -108,7 +108,7 @@ You can gain shell access to the desired virtual machine either by opening a KVM
 ```ShellSession
 virsh console <vmname>
 ```
-or by connection to the virtual machine over SSH (password is "pw")
+or by connection to the virtual machine over SSH (password is "pw%ssp")
 ```ShellSession
 ssh sysadm@<ipaddr>
 ```
@@ -117,7 +117,13 @@ ssh sysadm@<ipaddr>
 
 Purpose: Management machine
 
-IP Address: XX.ZZ.YY.1
+IP Address: XX.ZZ.YY.2
+
+#### heketi
+
+Puprose: Hosts the Heketi storage API for automization of GlusterFS storage clusters
+
+IP Address: XX.YY.ZZ.9
 
 #### kubemaster
 

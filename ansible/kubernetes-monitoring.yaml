@@ -10,38 +10,4 @@
       shell: helm repo update
 
     - name: Install Prometheus
-      shell: helm install stable/prometheus --namespace ssp-base --name prometheus
-
-    # Install Grafana
-
-    - name: Deploy the Grafana config map for the Prometheus datasource
-      shell: kubectl create -f /opt/mgmt/ssp/kubernetes/monitoring/grafana/config.yaml
-
-    - name: Install Grafana
-      shell: helm install stable/grafana -f /opt/mgmt/ssp/kubernetes/monitoring/grafana/values.yaml --namespace ssp-base --name grafana --set admin.existingSecret=admin-password
-
-    - name: Deploy the Grafana Ingress
-      shell: |
-        cat <<EOF | kubectl create -f -
-        apiVersion: extensions/v1beta1
-        kind: Ingress
-        metadata:
-          namespace: ssp-base
-          name: grafana-p
-          annotations:
-            kubernetes.io/ingress.class: nginx
-            kubernetes.io/tls-acme: "true"
-        spec:
-          tls:
-            - hosts:
-                - grafana.ssp.{{ platform.domain }}
-              secretName: grafana-p-tls
-          rules:
-            - host: grafana.ssp.{{ platform.domain }}
-              http:
-                paths:
-                  - path: /
-                    backend:
-                      serviceName: grafana
-                      servicePort: 80
-        EOF
+      shell: helm install prometheus stable/prometheus-operator --namespace ssp-base

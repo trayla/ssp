@@ -6,6 +6,10 @@
 
     # Install the KubeDB operator
 
+    - name: Wait until the platform has been started completely
+      wait_for:
+        timeout: 100
+
     - name: Add the AppsCode Helm repository
       shell: helm repo add appscode https://charts.appscode.com/stable/
 
@@ -13,14 +17,24 @@
       shell: helm repo update
 
     - name: Install the KubeDB operator via it's Helm chart
-      shell: "helm install appscode/kubedb --namespace ssp-base --name kubedb-operator --version v{{ platform.assets.kubedb.version }}"
+      shell: "helm install kubedb-operator appscode/kubedb --namespace ssp-base --version v{{ platform.assets.kubedb.version }}"
 
     - name: Wait some seconds for registration of all CRD's
-      pause:
-        seconds: 60
+      shell: kubectl -n ssp-base get pod -l release=kubedb-operator
+      register: result
+      until: (result.stdout | regex_findall("Running") | length) > 0
+      retries: 100
+      delay: 10
+
+    - name: Wait until the platform has been started completely
+      wait_for:
+        timeout: 1000
 
     - name: Install KubeDB catalog of database versions
-      shell: "helm install appscode/kubedb-catalog --name kubedb-catalog --version v{{ platform.assets.kubedb.version }} --namespace kube-system"
+      shell: |
+        helm install kubedb-catalog appscode/kubedb-catalog \
+          --version {{ platform.assets.kubedb.version }} \ 
+          --namespace kube-system
 
     # Install the KubeDB command line tool
 

@@ -12,16 +12,44 @@
   - name: Install the NGINX Helm package
     shell: "kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-{{ platform.assets.nginx.version }}/deploy/static/provider/baremetal/service-nodeport.yaml"
 
+  - name: Wait for the Nginx service to come up
+    shell: kubectl -n ingress-nginx get svc ingress-nginx
+    register: result
+    until: result.stdout.find("NodePort") != -1
+    retries: 100
+    delay: 10
+
   # Install Cert Manager
 
-  - name: Create the Kubernetes namespace for the Cert Manager
+  - name: Create the Cert Manager namespace
     shell: kubectl create namespace certmgr
-
-  - name: Install custom ressource definitions
-    shell: "kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-{{ platform.assets.certmanager.version.split('.')[0] }}.{{ platform.assets.certmanager.version.split('.')[1] }}/deploy/manifests/00-crds.yaml"
 
   - name: Disable the automatic validation feature on the Cert Manager namespace
     shell: kubectl label namespace certmgr certmanager.k8s.io/disable-validation="true"
+
+  - name: Add the Jetstack Helm repository
+    shell: |
+      helm repo add jetstack https://charts.jetstack.io
+      helm repo update
+
+  - name: Install the Cert Manager via it's Helm package
+    shell: |
+      helm install certmanager jetstack/cert-manager \
+        --namespace certmgr \
+        --version {{ platform.assets.certmanager.version }} \
+        --set installCRDs=true \
+        --set ingressShim.defaultIssuerKind=ClusterIssuer,ingressShim.defaultIssuerName=letsencrypt-production,ingressShim.defaultACMEChallengeType=http01
+
+  - name: Wait for the Cert Manager to come up
+    shell: kubectl get pods --namespace certmgr
+    register: result
+    until: (result.stdout | regex_findall("Running") | length) == 3
+    retries: 100
+    delay: 10
+
+  - name: Wait some more time
+    wait_for:
+      timeout: 30
 
   - name: Create the LetsEncrypt staging cluster issuer
     shell: |
@@ -64,12 +92,6 @@
                 ingress:
                   class: nginx
       EOF
-
-  - name: Add the Jetstack Helm repository
-    shell: helm repo add jetstack https://charts.jetstack.io
-
-  - name: Install the Cert Manager via it's Helm package
-    shell: "helm install --name certmanager --namespace certmgr --version v{{ platform.assets.certmanager.version }} jetstack/cert-manager --set ingressShim.defaultIssuerKind=ClusterIssuer,ingressShim.defaultIssuerName=letsencrypt-production,ingressShim.defaultACMEChallengeType=http01"
 
   # Deploy the Echo service
 

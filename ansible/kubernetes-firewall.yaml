@@ -4,14 +4,6 @@
     - /opt/mgmt/values-ssp.yaml
   tasks:
 
-  # Wait for the Nginx service to come up
-  - name: Wait for the Nginx service to come up
-    shell: kubectl -n ingress-nginx get svc ingress-nginx
-    register: result
-    until: result.stdout.find("NodePort") != -1
-    retries: 50
-    delay: 10
-
   - name: Determine the dynamic HTTP port of the Nginx service
     shell: kubectl -n ingress-nginx get svc ingress-nginx -o jsonpath='{.spec.ports[0].nodePort}'
     register: nginx_port_http

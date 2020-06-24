@@ -209,10 +209,6 @@ elif [ "$1" == "install" ]; then
   write_title "Executing ansible/kubernetes-monitoring.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-monitoring.yaml
 
-  # Install Weave
-  write_title "Executing ansible/kubernetes-weave.yaml"
-  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-weave.yaml
-
   # Install the Docker Registry
   write_title "Executing ansible/kubernetes-dockerreg.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-dockerreg.yaml

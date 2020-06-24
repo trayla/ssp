@@ -7,34 +7,34 @@
     # Install the Stash operator
 
     - name: Add the AppsCode Helm repository
-      shell: helm repo add appscode https://charts.appscode.com/stable/
-
-    - name: Update the local Helm repository
-      shell: helm repo update
+      shell: |
+        helm repo add appscode https://charts.appscode.com/stable/
+        helm repo update
 
     - name: Install the Stash operator via it's Helm chart
       shell: |
-        helm install appscode/stash --name stash-operator \
+        helm install stash-operator appscode/stash \
           --version {{ platform.assets.stash.version }} \
           --namespace ssp-base
 
-    # Install specific Stash operators
+    # Install specific Stash addons
 
     - name: Wait some time
       wait_for:
-        timeout: 60
+        timeout: 240
 
     - name: Install the Stash MongoDB support
       shell: |
-        curl -fsSL https://github.com/stashed/catalog/raw/{{ platform.assets.stash.catalog.version }}/deploy/helm2.sh | bash -s -- --catalog=stash-mongodb
+        curl -fsSL https://github.com/stashed/catalog/raw/{{ platform.assets.stash.catalog.version }}/deploy/helm3.sh | bash -s -- --catalog=stash-mongodb --version={{ item }}
+      with_items: "{{ platform.assets.stash.mongodb.versions }}"
 
     - name: Install the Stash Postgres support
       shell: |
-        curl -fsSL https://github.com/stashed/catalog/raw/{{ platform.assets.stash.catalog.version }}/deploy/helm2.sh | bash -s -- --catalog=stash-postgres
+        curl -fsSL https://github.com/stashed/catalog/raw/{{ platform.assets.stash.catalog.version }}/deploy/helm3.sh | bash -s -- --catalog=stash-postgres
 
     - name: Install the Stash MySQL support
       shell: |
-        curl -fsSL https://github.com/stashed/catalog/raw/{{ platform.assets.stash.catalog.version }}/deploy/helm2.sh | bash -s -- --catalog=stash-mysql
+        curl -fsSL https://github.com/stashed/catalog/raw/{{ platform.assets.stash.catalog.version }}/deploy/helm3.sh | bash -s -- --catalog=stash-mysql
 
     # Install the Stash command line tools
 
