@@ -23,8 +23,14 @@
 
     # Install necessary software
 
-    - name: Install necessary packages
+    - name: Install KVM
       apt:
-        name: qemu-kvm,libvirt-clients,libvirt-daemon-system,bridge-utils,virt-manager,libguestfs-tools,virt-top,sysstat,apt-transport-https,ca-certificates,curl,software-properties-common,python-lxml,python3-lxml,python-libvirt,python3-libvirt,python-pip
+        name: qemu-kvm,libvirt-clients,libvirt-daemon-system,bridge-utils,virt-manager,libguestfs-tools,virt-top,sysstat
+        state: present
+        update_cache: true
+
+    - name: Install further packages
+      apt:
+        name: apt-transport-https,ca-certificates,curl,software-properties-common,python3-lxml,python3-libvirt
         state: present
         update_cache: true

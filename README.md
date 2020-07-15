@@ -4,7 +4,7 @@
 
 ### Hardware requirements
 
-- A running bare metal machine with a plain Ubuntu 18.04 Server installation and root access (virtual machines are not supported)
+- A running bare metal machine with a plain Ubuntu 20.04 Server installation and root access (virtual machines are not supported)
 - Minimum 16 GB RAM (minimum 8 GB with slightly modified parameters)
 - Minimum 1 TB storage (minimum 150 GB with slightly modified parameters)
 
@@ -44,7 +44,7 @@ mkdir -p /data/data2
 
 Create a system administrator user and disable root
 ```ShellSession
-adduser -u 999 sysadm
+adduser -u 990 sysadm
 usermod -aG sudo sysadm
 passwd -l root
 ```

@@ -1,14 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 import os
 import sys
 import argparse
 import yaml
-
-try:
-  import json
-except ImportError:
-  import simplejson as json
+import simplejson
 
 platform_network_ipprefix = '10.20.30'
 with open("/opt/mgmt/values-ssp.yaml", 'r') as stream:
@@ -34,7 +30,7 @@ class Inventory(object):
     else:
       self.inventory = self.empty_inventory()
 
-    print json.dumps(self.inventory);
+    print(simplejson.dumps(self.inventory))
 
   # Example inventory for testing
   def get_inventory(self):

@@ -3,7 +3,7 @@
 BASEDIR=$(dirname "$0")
 
 # Install Linux packages which are necessary to determine configuration parameters
-apt install python-pip -y && pip install pyyaml
+apt install python3-pip -y && pip3 install pyyaml
 
 IPPREFIX=`$BASEDIR/python/read-value-ipprefix.py`
 ADMINPASSWORD=`$BASEDIR/python/read-value-adminpassword.py`
@@ -108,14 +108,12 @@ fi
 
 if [ "$1" == "prepare" ]; then
    # Install aptitude which is necessary for Ansible
-  apt install aptitude python-pip -y
+  apt install aptitude python3-pip -y
 
   # Install Python packages
   pip install pyyaml
 
-  # Install the latest version of Ansible from the PPA repository
-  apt-add-repository ppa:ansible/ansible
-  apt update
+  # Install Ansible
   apt install ansible -y
 
   # Create SSH key pair for the root user

@@ -52,7 +52,7 @@ platform:
 
   # The network settings
   network:
-    ipprefix: 10.99.99
+    ipprefix: 10.88.20
 
   # The backup configuration
   backup:

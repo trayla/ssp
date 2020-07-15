@@ -102,7 +102,7 @@
         path: /opt/mgmt
         src: "sshfs#root@{{ platform.network.ipprefix }}.1:/opt/mgmt"
         fstype: fuse
-        opts: delay_connect,idmap=user,uid=999,gid=999,umask=0,allow_other,_netdev,workaround=rename
+        opts: delay_connect,idmap=user,uid=990,gid=990,umask=0,allow_other,_netdev,workaround=rename
         state: mounted
 
     # Install kubectl

@@ -17,7 +17,7 @@ tee /tmp/startup.sh > /dev/null << EOF
 dpkg-reconfigure openssh-server
 /usr/sbin/update-grub
 netplan generate && netplan apply
-useradd -m -u 999 -p "" -s /bin/bash sysadm && usermod -aG sudo sysadm
+useradd -m -u 990 -p "" -s /bin/bash sysadm && usermod -aG sudo sysadm
 echo -e $PASSWORD"\n"$PASSWORD | passwd sysadm
 EOF
 
@@ -55,7 +55,7 @@ network:
   version: 2
   renderer: networkd
   ethernets:
-    ens2:
+    enp1s0:
       dhcp4: no
       addresses: [$IPADDR/24]
       gateway4: 10.88.20.1
@@ -72,7 +72,7 @@ virt-install \
   --vcpu $CPUS \
   --disk path=$DISKFILE,format=qcow2 \
   --os-type linux \
-  --os-variant ubuntu17.10 \
+  --os-variant ubuntu20.04 \
   --graphics none \
   --network bridge=virbr1,model=virtio \
   --noautoconsole
