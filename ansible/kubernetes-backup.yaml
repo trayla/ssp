@@ -25,8 +25,7 @@
 
     - name: Install the Stash MongoDB support
       shell: |
-        curl -fsSL https://github.com/stashed/catalog/raw/{{ platform.assets.stash.catalog.version }}/deploy/helm3.sh | bash -s -- --catalog=stash-mongodb --version={{ item }}
-      with_items: "{{ platform.assets.stash.mongodb.versions }}"
+        curl -fsSL https://github.com/stashed/catalog/raw/{{ platform.assets.stash.catalog.version }}/deploy/helm3.sh | bash -s -- --catalog=stash-mongodb
 
     - name: Install the Stash Postgres support
       shell: |
