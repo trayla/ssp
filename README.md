@@ -94,7 +94,9 @@ If everything worked as expected you should have the following setting on your m
 
 This picture shows an architectural overview of the desired platform:
 
-![system landscape](https://raw.githubusercontent.com/trayla/ssp/master/docs/systemlandscape.svg?sanitize=true)
+![Diagram](docs/landscape.svg)
+
+<a href="https://app.diagrams.net/#Htrayla%2Fssp%2Fmaster%2Fdocs%2Flandscape.svg" target="_blank">Edit</a>
 
 ### Virtual machines:
 
