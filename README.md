@@ -13,7 +13,7 @@
 - An understanding of Linux based system management and command line tools
 - An understanding of virtualization with KVM
 - Knowledge about operating a Kubernetes platform
-- A basic understanding about Gluster
+- A basic understanding of GlusterFS
 
 ### Necessary preliminaries
 
@@ -84,7 +84,7 @@ This command removes the whole plattform from your host:
 sudo /opt/mgmt/ssp/platform.sh remove
 ```
 
-After completion the system will be restarted. It takes a couple minutes of until all virtual machines and services are up an running.
+After completion the system will be restarted. It takes a couple minutes until all virtual machines and services are up an running.
 
 ## Result
 
