@@ -54,6 +54,11 @@ platform:
   network:
     ipprefix: 10.88.20
 
+  # The certificate issuer settings
+  certissuer:
+    # The certificate issuer stage (staging or production)
+    default: staging
+
   # The backup configuration
   backup:
     encryptionkey: tobechanged

@@ -125,9 +125,6 @@ if [ "$1" == "prepare" ]; then
   ssh-keygen -f /home/sysadm/.ssh/id_rsa -N ""
   chown -R sysadm:sysadm /home/sysadm/.ssh
 
-  # Save the firewall state to a file
-  iptables-save > /opt/mgmt/iptables-snapshot
-
 elif [ "$1" == "install" ]; then
   WORKERSRAM=`$BASEDIR/python/read-value-workersram.py`
 
@@ -141,9 +138,6 @@ elif [ "$1" == "install" ]; then
   rm /vmpool/${SSP_PREFIX}_*
   rm /data/data1/${SSP_PREFIX}_*
   rm /data/data2/${SSP_PREFIX}_*
-
-  # Restore the default iptables snapshot
-  iptables-restore < /opt/mgmt/iptables-snapshot
 
   # Prepare the host especially with some basic
   write_title "Executing ansible/host-prepare.yaml"
@@ -235,9 +229,6 @@ elif [ "$1" == "remove" ]; then
   rm /vmpool/${SSP_PREFIX}_*
   rm /data/data1/${SSP_PREFIX}_*
   rm /data/data2/${SSP_PREFIX}_*
-
-  # Restore the default iptables snapshot
-  iptables-restore < /opt/mgmt/iptables-snapshot
 
 elif [ "$1" == "add-disk" ]; then
   add_disk 1 $2

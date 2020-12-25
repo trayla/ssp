@@ -38,7 +38,7 @@
         --namespace certmgr \
         --version {{ platform.assets.certmanager.version }} \
         --set installCRDs=true \
-        --set ingressShim.defaultIssuerKind=ClusterIssuer,ingressShim.defaultIssuerName=letsencrypt-production,ingressShim.defaultACMEChallengeType=http01
+        --set ingressShim.defaultIssuerKind=ClusterIssuer,ingressShim.defaultIssuerName=letsencrypt-{{ platform.certissuer.default }},ingressShim.defaultACMEChallengeType=http01
 
   - name: Wait for the Cert Manager to come up
     shell: kubectl get pods --namespace certmgr

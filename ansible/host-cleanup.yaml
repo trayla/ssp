@@ -80,3 +80,29 @@
         state: absent
         line: 'ansible-playbook -i /opt/mgmt/ssp/python/get-ansible-inventory.py /opt/mgmt/ssp/ansible/startup.yaml'
       ignore_errors: yes
+
+    # Uninstall required Linux packages
+
+    - name: Uninstall base packages
+      apt:
+        name: apt-transport-https,ca-certificates,curl,software-properties-common,python3-lxml,python3-libvirt
+        state: absent
+
+    - name: Uninstall KVM
+      apt:
+        name: qemu-kvm,libvirt-clients,libvirt-daemon-system,bridge-utils,virt-manager,libguestfs-tools,virt-top,sysstat
+        state: absent
+
+    # Reset the iptables ruleset
+
+    - name: Reset the iptables ruleset
+      shell: |
+        iptables -F
+        iptables -X
+        iptables -t nat -F
+        iptables -t nat -X
+        iptables -t mangle -F
+        iptables -t mangle -X
+        iptables -P INPUT ACCEPT
+        iptables -P FORWARD ACCEPT
+        iptables -P OUTPUT ACCEPT
