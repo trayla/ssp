@@ -226,8 +226,8 @@ elif [ "$1" == "install" ]; then
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-backup.yaml
 
   # Deploy the database management KubeDB
-  write_title "Executing ansible/kubernetes-kubedb.yaml"
-  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-kubedb.yaml
+  #write_title "Executing ansible/kubernetes-kubedb.yaml"
+  #ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-kubedb.yaml
 
 elif [ "$1" == "remove" ]; then
   # Clean the host especially with the Hypervisor environment

@@ -77,10 +77,4 @@ virt-install \
   --network bridge=virbr1,model=virtio \
   --noautoconsole
 
-sleep 20
-
-virsh shutdown ${SSP_PREFIX}_${HOSTNAME}
-
 sleep 10
-
-virsh start ${SSP_PREFIX}_${HOSTNAME}

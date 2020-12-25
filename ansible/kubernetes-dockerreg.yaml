@@ -82,7 +82,7 @@
   - name: Deploy the Ingress
     shell: |
       cat <<EOF | kubectl create -f -
-      apiVersion: extensions/v1beta1
+      apiVersion: networking.k8s.io/v1
       kind: Ingress
       metadata:
         namespace: ssp-base
@@ -104,9 +104,12 @@
           http:
             paths:
             - path: /
+              pathType: Prefix
               backend:
-                serviceName: dockerreg-p
-                servicePort: 5000
+                service:
+                  name: dockerreg-p
+                  port:
+                    number: 5000
       EOF
 
   - name: Create the Docker Registry pull secret inside the ssp-base namespace

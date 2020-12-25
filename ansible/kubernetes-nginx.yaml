@@ -136,7 +136,7 @@
         selector:
           app: echo
       ---
-      apiVersion: extensions/v1beta1
+      apiVersion: networking.k8s.io/v1
       kind: Ingress
       metadata:
         namespace: ssp-base
@@ -156,9 +156,13 @@
         - host: echo.ssp.{{ platform.domain }}
           http:
             paths:
-            - backend:
-                serviceName: echo
-                servicePort: 80
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: echo
+                  port:
+                    number: 80
       EOF
 
 # Trust the Let's Encrypt staging CA on all nodes
