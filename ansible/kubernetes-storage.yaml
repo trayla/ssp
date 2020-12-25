@@ -24,7 +24,7 @@
 
     - name: Add an Apt signing key, will not download if present
       apt_key:
-        url: https://download.gluster.org/pub/gluster/glusterfs/6/rsa.pub
+        url: https://download.gluster.org/pub/gluster/glusterfs/{{ platform.assets.glusterfs.version }}/rsa.pub
         state: present
 
     - name: Add the Gluster Apt repository

@@ -17,24 +17,6 @@
           --version {{ platform.assets.stash.version }} \
           --namespace ssp-base
 
-    # Install specific Stash addons
-
-    - name: Wait some time
-      wait_for:
-        timeout: 240
-
-    - name: Install the Stash MongoDB support
-      shell: |
-        curl -fsSL https://github.com/stashed/catalog/raw/{{ platform.assets.stash.catalog.version }}/deploy/helm3.sh | bash -s -- --catalog=stash-mongodb
-
-    - name: Install the Stash Postgres support
-      shell: |
-        curl -fsSL https://github.com/stashed/catalog/raw/{{ platform.assets.stash.catalog.version }}/deploy/helm3.sh | bash -s -- --catalog=stash-postgres
-
-    - name: Install the Stash MySQL support
-      shell: |
-        curl -fsSL https://github.com/stashed/catalog/raw/{{ platform.assets.stash.catalog.version }}/deploy/helm3.sh | bash -s -- --catalog=stash-mysql
-
     # Install the Stash command line tools
 
     - name: Install the Stash kubectl plugin
