@@ -61,10 +61,6 @@ function attach_datadisk () {
   # Attach the disk to the virtual machine
   echo 'Attaching the newly created disk to the virtual machine ...'
   virsh attach-disk ${SSP_PREFIX}_$VM --source $FILE --target $DEVICE --persistent --subdriver qcow2
-
-  # Create a physical volume for the newly attached disk
-  echo 'Create a physical volume on the newly created disk ...'
-  ansible kubenode$1 -i $BASEDIR/python/get-ansible-inventory.py -a "pvcreate /dev/$DEVICE"
 }
 
 function create_datanode () {
@@ -82,23 +78,6 @@ function create_datanode () {
 
   # Attach the first data disks
   attach_datadisk $1 vdb $STORAGEDATASIZE
-
-  # Create the data volume group
-  ansible kubenode$1 -i $BASEDIR/python/get-ansible-inventory.py -a "vgcreate vgdata /dev/vdb"
-
-  # Create the data logical volume
-  ansible kubenode$1 -i $BASEDIR/python/get-ansible-inventory.py -a "lvcreate -n lvdata -l 100%FREE vgdata"
-}
-
-function add_disk () {
-  # Attach a new disk
-  attach_datadisk $1 $2 100G
-
-  # Add the new physical volume to the data volume group
-  ansible kubenode$1 -i $BASEDIR/python/get-ansible-inventory.py -a "vgextend vgdata /dev/$2"
-
-  # Resize the logical data volume to the maximum available space
-  ansible kubenode$1 -i $BASEDIR/python/get-ansible-inventory.py -a "lvextend -l +100%FREE /dev/vgdata/lvdata"
 }
 
 if [ "$EUID" -ne 0 ]
@@ -222,10 +201,6 @@ elif [ "$1" == "remove" ]; then
   rm /vmpool/${SSP_PREFIX}_*
   rm /data/data1/${SSP_PREFIX}_*
   rm /data/data2/${SSP_PREFIX}_*
-
-elif [ "$1" == "add-disk" ]; then
-  add_disk 1 $2
-  add_disk 2 $2
 
 else
   echo "Deploys a Kubernetes cluster"

@@ -214,7 +214,7 @@
                       "zone": 1
                     },
                     "devices": [
-                      "/dev/vgdata/lvdata"
+                      "/dev/vdb"
                     ]
                   },
                   {
@@ -230,7 +230,7 @@
                       "zone": 1
                     },
                     "devices": [
-                      "/dev/vgdata/lvdata"
+                      "/dev/vdb"
                     ]
                   }
                 ]
