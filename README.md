@@ -69,7 +69,7 @@ The Single Server Platform provides a lot of services to the outside world. In o
 
 ## Usage
 
-Prepare your host with the following command. This is necessary only once while you can install and remove the platform from your host as much as you like. During this process you have to accept the licence agreement of the Ansible product suite.
+Prepare your host with the following command. This is necessary only once while you can install and remove the platform from your host as much as you like.
 ```ShellSession
 sudo /opt/mgmt/ssp/platform.sh prepare
 ```

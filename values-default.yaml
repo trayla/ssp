@@ -4,11 +4,11 @@ platform:
     kubernetes:
       version: 1.19.6-00
     calico:
-      version: 3.15
+      version: 3.17
     istio:
       version: 1.6.3
     nginx:
-      version: 0.26.1
+      version: 0.7.1
     certmanager:
       version: v1.1.0
     heketi:

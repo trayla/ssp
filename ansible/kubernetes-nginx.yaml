@@ -6,18 +6,24 @@
 
   # Install the NGINX web proxy via it's officially supported Helm package
 
-  - name: Install prerequisites of the NGINX ingress
-    shell: "kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-{{ platform.assets.nginx.version }}/deploy/static/mandatory.yaml"
-
-  - name: Install the NGINX Helm package
-    shell: "kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-{{ platform.assets.nginx.version }}/deploy/static/provider/baremetal/service-nodeport.yaml"
+  - name: Install the Nginx ingress
+    shell: |
+      #helm repo add nginx-stable https://helm.nginx.com/stable
+      #helm repo update
+      #helm install nginx nginx-stable/nginx-ingress \
+      #  --namespace ssp-base \
+      #  --version {{ platform.assets.nginx.version }} \
+      #  --set controller.service.type=NodePort \
+      #  --set controller.setAsDefaultIngress=true
+      helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+      helm repo update
+      helm install ingress-nginx ingress-nginx/ingress-nginx \
+        --namespace ssp-base \
+        --set controller.service.type=NodePort
 
   - name: Wait for the Nginx service to come up
-    shell: kubectl -n ingress-nginx get svc ingress-nginx
-    register: result
-    until: result.stdout.find("NodePort") != -1
-    retries: 100
-    delay: 10
+    shell: |
+      kubectl -n ssp-base wait --for=condition=available deployment ingress-nginx-controller --timeout=600s
 
   # Install Cert Manager
 
@@ -54,7 +60,7 @@
   - name: Create the LetsEncrypt staging cluster issuer
     shell: |
       cat <<EOF | kubectl create -f -
-      apiVersion: cert-manager.io/v1alpha2
+      apiVersion: cert-manager.io/v1
       kind: ClusterIssuer
       metadata:
         labels:
@@ -75,7 +81,7 @@
   - name: Create the LetsEncrypt production cluster issuer
     shell: |
       cat <<EOF | kubectl create -f -
-      apiVersion: cert-manager.io/v1alpha2
+      apiVersion: cert-manager.io/v1
       kind: ClusterIssuer
       metadata:
         labels:

@@ -132,13 +132,6 @@ elif [ "$1" == "install" ]; then
   write_title "Executing ansible/host-prerequisites.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/host-prerequisites.yaml
 
-  # Clean the host especially with the Hypervisor environment
-  write_title "Executing ansible/host-cleanup.yaml"
-  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/host-cleanup.yaml
-  rm /vmpool/${SSP_PREFIX}_*
-  rm /data/data1/${SSP_PREFIX}_*
-  rm /data/data2/${SSP_PREFIX}_*
-
   # Prepare the host especially with some basic
   write_title "Executing ansible/host-prepare.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/host-prepare.yaml

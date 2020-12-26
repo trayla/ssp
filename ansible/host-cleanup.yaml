@@ -83,14 +83,9 @@
 
     # Uninstall required Linux packages
 
-    - name: Uninstall base packages
-      apt:
-        name: apt-transport-https,ca-certificates,curl,software-properties-common,python3-lxml,python3-libvirt
-        state: absent
-
     - name: Uninstall KVM
       apt:
-        name: qemu-kvm,libvirt-clients,libvirt-daemon-system,bridge-utils,virt-manager,libguestfs-tools,virt-top,sysstat
+        name: qemu-kvm,libvirt-clients,libvirt-daemon-system,virt-manager,libguestfs-tools,virt-top
         state: absent
 
     # Reset the iptables ruleset

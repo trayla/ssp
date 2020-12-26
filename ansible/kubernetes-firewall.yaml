@@ -5,11 +5,11 @@
   tasks:
 
   - name: Determine the dynamic HTTP port of the Nginx service
-    shell: kubectl -n ingress-nginx get svc ingress-nginx -o jsonpath='{.spec.ports[0].nodePort}'
+    shell: kubectl -n ssp-base get svc ingress-nginx-controller -o jsonpath='{.spec.ports[0].nodePort}'
     register: nginx_port_http
 
   - name: Determine the dynamic HTTPS port of the Nginx service
-    shell: kubectl -n ingress-nginx get svc ingress-nginx -o jsonpath='{.spec.ports[1].nodePort}'
+    shell: kubectl -n ssp-base get svc ingress-nginx-controller -o jsonpath='{.spec.ports[1].nodePort}'
     register: nginx_port_https
 
   - name: Show the ports of the Nginx service
