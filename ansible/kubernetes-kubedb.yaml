@@ -17,10 +17,10 @@
       shell: helm repo update
 
     - name: Install the KubeDB operator via it's Helm chart
-      shell: "helm install kubedb-operator appscode/kubedb --namespace ssp-base --version {{ platform.assets.kubedb.version }}"
+      shell: "helm install kubedb-operator appscode/kubedb --namespace ssp --version {{ platform.assets.kubedb.version }}"
 
     - name: Wait some seconds for registration of all CRD's
-      shell: kubectl -n ssp-base get pod -l release=kubedb-operator
+      shell: kubectl -n ssp get pod -l release=kubedb-operator
       register: result
       until: (result.stdout | regex_findall("Running") | length) > 0
       retries: 100

@@ -287,6 +287,7 @@
         kind: Endpoints
         metadata:
           name: glusterfs-static
+          namespace: ssp
         subsets:
           - addresses:
               - ip: "{{ hostvars['kubenode1']['ansible_default_ipv4']['address'] }}"
@@ -301,6 +302,7 @@
         kind: Service
         metadata:
           name: gluster
+          namespace: ssp
         spec:
           ports:
             - port: 1
@@ -315,6 +317,7 @@
           labels:
             name: gluster-client
           name: gluster-client
+          namespace: ssp
         spec:
           selector:
             matchLabels:
@@ -350,7 +353,7 @@
         kind: Secret
         metadata:
           name: heketi-login
-          namespace: ssp-base
+          namespace: ssp
         type: "kubernetes.io/glusterfs"
         data:
           key: "{{ platform.admin.password | b64encode }}"
@@ -370,6 +373,6 @@
           resturl: "http://{{ hostvars['heketi']['ansible_default_ipv4']['address'] }}:8080"
           restuser: admin
           secretName: heketi-login
-          secretNamespace: ssp-base
+          secretNamespace: ssp
           volumetype: none
         EOF

@@ -31,14 +31,14 @@ function create_console() {
 
 function create_heketi() {
   # Create the Heketi machine
-  $BASEDIR/scripts/deploy-vm.sh heketi 1024 1 20G $ADMINPASSWORD $HEKETI_IPADDR net-tools,openssh-server,aptitude,curl
+  $BASEDIR/scripts/deploy-vm.sh heketi 2048 1 20G $ADMINPASSWORD $HEKETI_IPADDR net-tools,openssh-server,aptitude,curl
   ssh-keygen -f "/root/.ssh/known_hosts" -R $HEKETI_IPADDR
   ssh-keygen -f "/home/sysadm/.ssh/known_hosts" -R $HEKETI_IPADDR
 }
 
 function create_masternode() {
   # Create the Kubernetes master
-  $BASEDIR/scripts/deploy-vm.sh kubemaster 2048 2 20G $ADMINPASSWORD $KUBEMASTER_IPADDR net-tools,openssh-server,aptitude,curl
+  $BASEDIR/scripts/deploy-vm.sh kubemaster 4096 2 20G $ADMINPASSWORD $KUBEMASTER_IPADDR net-tools,openssh-server,aptitude,curl
   ssh-keygen -f "/root/.ssh/known_hosts" -R $KUBEMASTER_IPADDR
   ssh-keygen -f "/home/sysadm/.ssh/known_hosts" -R $KUBEMASTER_IPADDR
 }

@@ -15,7 +15,7 @@
       shell: |
         helm install stash-operator appscode/stash \
           --version {{ platform.assets.stash.version }} \
-          --namespace ssp-base
+          --namespace ssp
 
     # Install the Stash command line tools
 

@@ -90,7 +90,7 @@
     # Install the base components
 
     - name: Create the base namespace
-      shell: kubectl create namespace ssp-base
+      shell: kubectl create namespace ssp
 
     - name: Create the Docker Registry pull secret inside all custom namespaces
-      shell: "kubectl create -n ssp-base secret generic admin-password --from-literal=admin-user=admin --from-literal=admin-password={{ platform.admin.password }}"
+      shell: "kubectl create -n ssp secret generic admin-password --from-literal=admin-user=admin --from-literal=admin-password={{ platform.admin.password }}"

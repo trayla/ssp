@@ -51,7 +51,7 @@ passwd -l root
 
 #### Install scripts
 
-In order to execute the scripts you have to clone this GitHub repository to your server into the directory /opt/mgmt/ssp-base by issuing the following commands:
+In order to execute the scripts you have to clone this GitHub repository to your server into the directory /opt/mgmt/ssp by issuing the following commands:
 ```ShellSession
 mkdir -p /opt/mgmt/ssp
 git clone https://github.com/trayla/ssp.git /opt/mgmt/ssp

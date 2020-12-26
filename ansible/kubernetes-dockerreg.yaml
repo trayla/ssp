@@ -12,7 +12,7 @@
       apiVersion: apps/v1
       kind: Deployment
       metadata:
-        namespace: ssp-base
+        namespace: ssp
         name: dockerreg
       spec:
         selector:
@@ -38,7 +38,7 @@
             volumes:
             - name: data
               persistentVolumeClaim:
-                  claimName: dockerreg-p
+                  claimName: dockerreg
       EOF
 
   - name: Deploy the physical volume claim
@@ -47,8 +47,8 @@
       apiVersion: v1
       kind: PersistentVolumeClaim
       metadata:
-        namespace: ssp-base
-        name: dockerreg-p
+        namespace: ssp
+        name: dockerreg
       spec:
         resources:
           requests:
@@ -64,8 +64,8 @@
       apiVersion: v1
       kind: Service
       metadata:
-        namespace: ssp-base
-        name: dockerreg-p
+        namespace: ssp
+        name: dockerreg
         labels:
           app: dockerreg
           env: p
@@ -85,8 +85,8 @@
       apiVersion: networking.k8s.io/v1
       kind: Ingress
       metadata:
-        namespace: ssp-base
-        name: dockerreg-p
+        namespace: ssp
+        name: dockerreg
         annotations:
           kubernetes.io/ingress.class: nginx
           kubernetes.io/tls-acme: "true"
@@ -98,7 +98,7 @@
         tls:
         - hosts:
           - dockerreg.ssp.{{ platform.domain }}
-          secretName: dockerreg-p-tls
+          secretName: dockerreg-tls
         rules:
         - host: dockerreg.ssp.{{ platform.domain }}
           http:
@@ -107,10 +107,10 @@
               pathType: Prefix
               backend:
                 service:
-                  name: dockerreg-p
+                  name: dockerreg
                   port:
                     number: 5000
       EOF
 
-  - name: Create the Docker Registry pull secret inside the ssp-base namespace
-    shell: "kubectl create -n ssp-base secret docker-registry dockerreg-pull --docker-server=dockerreg.ssp.{{ platform.domain }} --docker-username=admin --docker-password={{ platform.admin.password }} --docker-email={{ platform.email }}"
+  - name: Create the Docker Registry pull secret inside the ssp namespace
+    shell: "kubectl create -n ssp secret docker-registry dockerreg-pull --docker-server=dockerreg.ssp.{{ platform.domain }} --docker-username=admin --docker-password={{ platform.admin.password }} --docker-email={{ platform.email }}"
