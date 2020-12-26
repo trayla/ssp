@@ -6,8 +6,17 @@
 
     # Install Prometheus
 
-    - name: Update the Helm repository
-      shell: helm repo update
-
     - name: Install Prometheus
-      shell: helm install prometheus stable/prometheus-operator --namespace ssp-base
+      shell: |
+        helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+        helm repo update
+        helm install prometheus prometheus-community/kube-prometheus-stack \
+          --namespace ssp-base \
+          --values /opt/mgmt/ssp/kubernetes/monitoring/values.yaml \
+          --set prometheus.ingress.hosts[0]=prometheus.ssp.{{ platform.domain }} \
+          --set prometheus.ingress.tls[0].hosts[0]=prometheus.ssp.{{ platform.domain }} \
+          --set alertmanager.ingress.hosts[0]=alertmanager.ssp.{{ platform.domain }} \
+          --set alertmanager.ingress.tls[0].hosts[0]=alertmanager.ssp.{{ platform.domain }} \
+          --set grafana.ingress.hosts[0]=grafana.ssp.{{ platform.domain }} \
+          --set grafana.ingress.tls[0].hosts[0]=grafana.ssp.{{ platform.domain }} \
+          --set grafana.ingress.adminPassword={{ platform.admin.password }}
