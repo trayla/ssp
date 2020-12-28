@@ -17,6 +17,8 @@ platform:
       version: 5.2.1
     glusterfs:
       version: 8
+    velero:
+      version: 1.5.2
     stash:
       version: v0.9.0-rc.6
       catalog:
