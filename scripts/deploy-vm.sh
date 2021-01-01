@@ -77,4 +77,4 @@ virt-install \
   --network bridge=virbr1,model=virtio \
   --noautoconsole
 
-sleep 10
+sleep 20

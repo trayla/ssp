@@ -36,11 +36,11 @@ class Inventory(object):
   def get_inventory(self):
     return {
       'all': {
-        'hosts': [ 'host', 'console', 'heketi' ],
+        'hosts': [ 'host', 'console' ],
         'children': [ 'kubernetes' ]
       },
       'vms': {
-        'hosts': [ 'console', 'heketi' ],
+        'hosts': [ 'console' ],
         'children': [ 'kubernetes' ]
       },
       'kubernetes': {

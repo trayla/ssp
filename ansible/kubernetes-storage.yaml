@@ -1,378 +1,111 @@
-# Install GlusterFS components on each node
+# Install Longhorn requirements on each data node
 - hosts: kubenodes
   become: yes
   vars_files:
-    - /opt/mgmt/values-ssp.yaml
+  - /opt/mgmt/values-ssp.yaml
   tasks:
 
-    - name: Install some LVM specific kernel modules
-      shell: |
-        echo "dm_snapshot" >> /etc/modules
-        echo "dm_mirror" >> /etc/modules
-        echo "dm_thin_pool" >> /etc/modules
-        echo "dm_snapshot" >> /etc/initramfs-tools/modules
-        echo "dm_mirror" >> /etc/initramfs-tools/modules
-        echo "dm_thin_pool" >> /etc/initramfs-tools/modules
+  - name: Enforce the ext4 filesystem on the data disk
+    shell: mkfs.ext4 /dev/vdb
 
-    - name: Activate LVM specific kernel modules immediately
-      shell: "modprobe dm_snapshot && modprobe dm_mirror && modprobe dm_thin_pool"
+  - name: Create the longhorn data directory
+    file:
+      path: /var/lib/longhorn
+      state: directory
 
-    - name: install GPG
-      apt:
-        name: gnupg
-        state: present
+  - name: Create a permanent mount of the data disk
+    mount:
+      path: /var/lib/longhorn
+      src: /dev/vdb
+      fstype: ext4
+      state: mounted
 
-    - name: Add an Apt signing key, will not download if present
-      apt_key:
-        url: https://download.gluster.org/pub/gluster/glusterfs/{{ platform.assets.glusterfs.version }}/rsa.pub
-        state: present
+  - name: Install iSCSI packages for Longhorn
+    apt:
+      name: open-iscsi
+      state: present
 
-    - name: Add the Gluster Apt repository
-      apt_repository:
-        repo: "ppa:gluster/glusterfs-{{ platform.assets.glusterfs.version }}"
+  - name: Install NFS tools for Longhorn
+    apt:
+      name: nfs-common
+      state: present
 
-    - name: Install GlusterFS server
-      apt:
-        name: glusterfs-server
-        state: present
-        update_cache: true
-
-    - name: Install Thin Provisioning tools
-      apt:
-        name: thin-provisioning-tools
-        state: present
-
-# Join the GlusterFS nodes to a cluster
-- hosts: kubenode1
-  become: yes
-  vars_files:
-    - /opt/mgmt/values-ssp.yaml
-  tasks:
-
-    - name: Introduce the other cluster nodes
-      command: gluster peer probe {{ item }}
-      with_items: "{{ groups.kubenodes }}"
-
-# Install the Heketi service
-- hosts: heketi
-  become: yes
-  vars_files:
-    - /opt/mgmt/values-ssp.yaml
-  tasks:
-
-    - name: Create the Heketi group
-      group:
-        gid: 515
-        name: heketi
-        state: present
-
-    - name: Create Heketi user and add it to the Heketi group
-      user:
-        uid: 515
-        name: heketi
-        group: heketi
-        shell: /bin/false
-        home: /var/lib/heketi
-        state: present
-
-    - name: Create the Heketi directories
-      file:
-        path: '{{ item }}'
-        state: directory
-        owner: heketi
-        group: heketi
-      loop:
-        - "/var/lib/heketi"
-        - "/var/log/heketi"
-
-    - name: Create the Heketi etc directory
-      file:
-        path: /etc/heketi
-        state: directory
-
-    - name: Generate an RSA key pair to allow Heketi to login on all storage nodes
-      shell: "yes y | ssh-keygen -f /etc/heketi/heketi_key -t rsa -N '' >/dev/null"
-
-    - name: Read the public RSA key
-      shell: "cat /etc/heketi/heketi_key.pub"
-      register: heketi_rsa_key_pub
-
-    - name: The public Heketi key
-      debug:
-        msg: "{{ heketi_rsa_key_pub.stdout }}"
-
-    - name: Store the Heketi public key
-      set_fact:
-        heketi_rsa_key_pub: "{{ heketi_rsa_key_pub.stdout }}"
-
-    - name: Give Heketi access to the key pair
-      file:
-        path: /etc/heketi/heketi_key
-        owner: heketi
-        group: heketi
-
-    - name: Download and unpack the Heketi deployment
-      unarchive:
-        src: "https://github.com/heketi/heketi/releases/download/v{{ platform.assets.heketi.version }}/heketi-v{{ platform.assets.heketi.version }}.linux.amd64.tar.gz"
-        dest: /tmp
-        remote_src: yes
-
-    - name: Copy the Heketi command line client to the binaries directory
-      copy:
-        remote_src: yes
-        src: /tmp/heketi/{{ item }}
-        dest: /usr/local/bin/{{ item }}
-        owner: heketi
-        group: heketi
-        mode: '0755'
-      loop:
-        - "heketi"
-        - "heketi-cli"
-
-    - name: Create the Heketi configuration file
-      copy:
-        dest: /etc/heketi/heketi.json
-        content: |
-          {
-            "port": "8080",
-            "use_auth": true,
-            "jwt": {
-              "admin": {
-                "key": "{{ platform.admin.password  }}"
-              },
-              "user": {
-                "key": "{{ platform.admin.password  }}"
-              }
-            },
-            "glusterfs": {
-              "executor": "ssh",
-              "sshexec": {
-                "keyfile": "/etc/heketi/heketi_key",
-                "user": "root",
-                "port": "22",
-                "fstab": "/etc/fstab"
-              },
-              "db": "/var/lib/heketi/heketi.db",
-              "brick_max_size_gb" : 1024,
-              "brick_min_size_gb" : 1,
-              "max_bricks_per_volume" : 33,
-              "loglevel" : "info"
-            }
-          }
-
-    - name: Create the Heketi service defintion
-      copy:
-        dest: /etc/systemd/system/heketi.service
-        content: |
-          [Unit]
-          Description=Heketi Server
-          Requires=network-online.target
-          After=network-online.target
-          [Service]
-          Type=simple
-          User=heketi
-          Group=heketi
-          PermissionsStartOnly=true
-          PIDFile=/run/heketi/heketi.pid
-          Restart=on-failure
-          RestartSec=10
-          WorkingDirectory=/var/lib/heketi
-          RuntimeDirectory=heketi
-          RuntimeDirectoryMode=0755
-          ExecStart=/usr/local/bin/heketi --config=/etc/heketi/heketi.json
-          ExecReload=/bin/kill -s HUP $MAINPID
-          KillSignal=SIGINT
-          TimeoutStopSec=5
-          [Install]
-          WantedBy=multi-user.target
-
-    - name: Reload systemd, start and enable the Heketi service
-      systemd:
-        name: heketi
-        state: started
-        enabled: yes
-        daemon_reload: yes
-
-    - name: Create the Heketi topology definition
-      copy:
-        dest: /etc/heketi/topology.json
-        content: |
-          {
-            "clusters": [
-              {
-                "nodes": [
-                  {
-                    "node": {
-                      "hostnames": {
-                        "manage": [
-                          "kubenode1"
-                        ],
-                        "storage": [
-                          "{{ hostvars['kubenode1']['ansible_default_ipv4']['address'] }}"
-                        ]
-                      },
-                      "zone": 1
-                    },
-                    "devices": [
-                      "/dev/vdb"
-                    ]
-                  },
-                  {
-                    "node": {
-                      "hostnames": {
-                        "manage": [
-                          "kubenode2"
-                        ],
-                        "storage": [
-                          "{{ hostvars['kubenode2']['ansible_default_ipv4']['address'] }}"
-                        ]
-                      },
-                      "zone": 1
-                    },
-                    "devices": [
-                      "/dev/vdb"
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-
-# Share SSH keys of the storage nodes for Heketi
-- hosts: kubenodes
-  become: yes
-  vars_files:
-    - /opt/mgmt/values-ssp.yaml
-  tasks:
-
-    - shell: "echo '{{ hostvars['heketi'].heketi_rsa_key_pub }}' > /tmp/key"
-
-    - name: Share the Heketi SSH key on every storage node
-      authorized_key:
-        user: root
-        state: present
-        key: "{{ hostvars['heketi'].heketi_rsa_key_pub }}"
-
-    - name: Restart the SSH daemon
-      systemd:
-        state: restarted
-        daemon_reload: yes
-        name: sshd
-
-# Instantiate the Heketi service
-- hosts: heketi
-  become: yes
-  vars_files:
-    - /opt/mgmt/values-ssp.yaml
-  tasks:
-
-    - name: Initialize Heketi with the storage topology
-      shell: "/usr/local/bin/heketi-cli topology load --json=/etc/heketi/topology.json"
-      environment:
-        HEKETI_CLI_SERVER: "http://{{ hostvars['heketi']['ansible_default_ipv4']['address'] }}:8080"
-        HEKETI_CLI_USER: "admin"
-        HEKETI_CLI_KEY: "{{ platform.admin.password  }}"
-
-# Create storage specific Kubernetes ressources
+# Install Longhorn inside the cluster
 - hosts: console
   become: yes
   vars_files:
-    - /opt/mgmt/values-ssp.yaml
+  - /opt/mgmt/values-ssp.yaml
   tasks:
 
-    - name: Deploy the static Gluster service inside the Kubernetes cluster
-      shell: |
-        cat <<EOF | kubectl create -f -
-        apiVersion: v1
-        kind: Endpoints
-        metadata:
-          name: glusterfs-static
-          namespace: ssp
-        subsets:
-          - addresses:
-              - ip: "{{ hostvars['kubenode1']['ansible_default_ipv4']['address'] }}"
-            ports:
-              - port: 1
-          - addresses:
-              - ip: "{{ hostvars['kubenode2']['ansible_default_ipv4']['address'] }}"
-            ports:
-              - port: 1
-        ---
-        apiVersion: v1
-        kind: Service
-        metadata:
-          name: gluster
-          namespace: ssp
-        spec:
-          ports:
-            - port: 1
-        EOF
+  - name: Install Longhorn
+    shell: |
+      helm repo add longhorn https://charts.longhorn.io
+      helm repo update
+      helm install longhorn longhorn/longhorn --namespace ssp \
+        --version {{ platform.assets.longhorn.version }} \
+        --set defaultSettings.backupTarget=s3://{{ platform.storage.backup.s3.bucket }}@{{ platform.storage.backup.s3.region }}/ \
+        --set defaultSettings.backupTargetCredentialSecret=longhorn-backuptarget
 
-    - name: Deploy the Gluster daemon set inside the Kubernetes cluster
-      shell: |
-        cat <<EOF | kubectl create -f -
-        apiVersion: apps/v1
-        kind: DaemonSet
-        metadata:
-          labels:
-            name: gluster-client
-          name: gluster-client
-          namespace: ssp
-        spec:
-          selector:
-            matchLabels:
-              name: gluster-client
-          template:
-            metadata:
-              labels:
-                name: gluster-client
-            spec:
-              containers:
-                - name: gluster
-                  image: gluster/gluster-centos
-                  livenessProbe:
-                    exec:
-                      command:
-                        - "/bin/bash"
-                        - "-c"
-                        - systemctl status glusterd.service
-                  readinessProbe:
-                    exec:
-                      command:
-                        - "/bin/bash"
-                        - "-c"
-                        - systemctl status glusterd.service
-                  securityContext:
-                    privileged: true
-        EOF
+  - name: Create an Ingress for the Longhorn UI
+    shell: |
+      cat <<EOF | kubectl create -f -
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        namespace: ssp
+        name: longhorn
+        annotations:  
+          kubernetes.io/ingress.class: nginx
+          kubernetes.io/tls-acme: "true"
+          nginx.ingress.kubernetes.io/auth-type: basic
+          nginx.ingress.kubernetes.io/auth-secret: basic-auth
+          nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+      spec:
+        tls:
+        - hosts:
+          - longhorn.ssp.{{ platform.domain }}
+          secretName: longhorn-tls
+        rules:
+        - host: longhorn.ssp.{{ platform.domain }}
+          http:
+            paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: longhorn-frontend
+                  port:
+                    number: 80
+      EOF
 
-    - name: Deploy the Heketi password as a Kubernetes secret
-      shell: |
-        cat <<EOF | kubectl create -f -
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: heketi-login
-          namespace: ssp
-        type: "kubernetes.io/glusterfs"
-        data:
-          key: "{{ platform.admin.password | b64encode }}"
-        EOF
+  - name: Create the default storage class
+    shell: |
+      cat <<EOF | kubectl create -f -
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: default
+        annotations:
+          storageclass.kubernetes.io/is-default-class: "true"
+      provisioner: driver.longhorn.io
+      allowVolumeExpansion: true
+      parameters:
+        numberOfReplicas: "1"
+        staleReplicaTimeout: "2880"
+        fromBackup: ""
+      EOF
 
-    - name: Deploy the dynamicstorage class
-      shell: |
-        cat <<EOF | kubectl create -f -
-        apiVersion: storage.k8s.io/v1
-        kind: StorageClass
-        metadata:
-          name: default
-          annotations:
-            storageclass.kubernetes.io/is-default-class: "true"
-        provisioner: kubernetes.io/glusterfs
-        parameters:
-          resturl: "http://{{ hostvars['heketi']['ansible_default_ipv4']['address'] }}:8080"
-          restuser: admin
-          secretName: heketi-login
-          secretNamespace: ssp
-          volumetype: none
-        EOF
+  - name: Create the backup access secret
+    shell: |
+      cat <<EOF | kubectl create -f -
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: longhorn-backuptarget
+        namespace: ssp
+      type: Opaque
+      data:
+        AWS_ACCESS_KEY_ID: {{ platform.storage.backup.s3.access_key_id | string | b64encode }}
+        AWS_SECRET_ACCESS_KEY: {{ platform.storage.backup.s3.secret_access_key | string | b64encode }}
+        AWS_ENDPOINTS: {{ platform.storage.backup.s3.endpoints | string | b64encode }}
+      EOF
