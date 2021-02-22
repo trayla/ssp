@@ -85,8 +85,6 @@
       kind: StorageClass
       metadata:
         name: default
-        annotations:
-          storageclass.kubernetes.io/is-default-class: "true"
       provisioner: driver.longhorn.io
       allowVolumeExpansion: true
       parameters:
@@ -94,6 +92,11 @@
         staleReplicaTimeout: "2880"
         fromBackup: ""
       EOF
+
+  - name: Switch the default storage class
+    shell: |
+      kubectl patch storageclass longhorn -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
+      kubectl patch storageclass default -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 
   - name: Create the backup access secret
     shell: |

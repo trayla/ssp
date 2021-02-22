@@ -19,7 +19,7 @@
 
 #### Storage
 
-Your system has to provide three directories which will be used as KVM storage pools and therefore populated with disk images for the upcoming virtual machines. The following directories have to be create prior to the start of the installation procedure. 
+Your system has to provide one directory which will be used as a KVM storage pool and therefore populated with disk images for the upcoming virtual machines. The following directory has to be created prior to the start of the installation procedure. 
 
 ##### /vmpool
 
@@ -30,15 +30,9 @@ Create the directory of the default storage pool:
 mkdir -p /vmpool
 ```
 
-##### /data/data1 and /data/data2
+##### Data Devices
 
-These directories are going to be used as redundancy nodes for the storage cluster and should be on seperate storage disks. Using a high available disk setup like RAID 1 or 5 is not necessary here due to the redenundany of the upcoming storage cluster.
-
-Create the directories of the data storage pools:
-```ShellSession
-mkdir -p /data/data1
-mkdir -p /data/data2
-```
+Furthermore we need two storage devices to hold the payload data for the cluster (one per worker node). Each worker node provides a Longhorn storage operator which needs one disk. It has to be a partition of an arbitrary block device such as a phisical disk or a LVM logical volume. You have to assign these devices while staring the installation procedure a bit later. Keep in mind that these devices will be erased during installation.
 
 #### A sudo user for system administration
 
@@ -74,9 +68,9 @@ Prepare your host with the following command. This is necessary only once while 
 sudo /opt/mgmt/ssp/platform.sh prepare
 ```
 
-Install the platform with the following command:
+Install the platform with the following command. Replace the storage devices /dev/sdx1 and /dev/sdy1 with the devices of your choice.
 ```ShellSession
-sudo /opt/mgmt/ssp/platform.sh install
+sudo /opt/mgmt/ssp/platform.sh install /dev/sdx1 /dev/sdy1
 ```
 
 This command removes the whole plattform from your host:
@@ -120,12 +114,6 @@ ssh sysadm@<ipaddr>
 Purpose: Management machine
 
 IP Address: XX.ZZ.YY.2
-
-#### heketi
-
-Puprose: Hosts the Heketi storage API for automization of GlusterFS storage clusters
-
-IP Address: XX.YY.ZZ.9
 
 #### kubemaster
 

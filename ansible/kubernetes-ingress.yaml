@@ -40,6 +40,8 @@
         --namespace certmgr \
         --version {{ platform.assets.certmanager.version }} \
         --set installCRDs=true \
+        --set prometheus.enabled=true \
+        --set prometheus.servicemonitor.enabled=true \
         --set ingressShim.defaultIssuerKind=ClusterIssuer,ingressShim.defaultIssuerName=letsencrypt-{{ platform.certissuer.default }},ingressShim.defaultACMEChallengeType=http01
 
   - name: Wait for the Cert Manager to come up

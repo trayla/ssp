@@ -14,7 +14,7 @@ apt install python3-pip -y && pip3 install pyyaml
 
 IPPREFIX=`$BASEDIR/python/read-value-ipprefix.py`
 ADMINPASSWORD=`$BASEDIR/python/read-value-adminpassword.py`
-STORAGEDATASIZE=`$BASEDIR/python/read-value-storagedatasize.py`
+STORAGEWORKERSIZE=`$BASEDIR/python/read-value-storageworkersize.py`
 
 SSP_PREFIX=ssp
 CONSOLE_IPADDR=$IPPREFIX.2
@@ -37,7 +37,7 @@ function create_console() {
 
 function create_masternode() {
   # Create the Kubernetes master
-  $BASEDIR/scripts/deploy-vm.sh kubemaster 4096 2 20G $ADMINPASSWORD $KUBEMASTER_IPADDR net-tools,openssh-server,aptitude,curl
+  $BASEDIR/scripts/deploy-vm.sh kubemaster 4096 2 50G $ADMINPASSWORD $KUBEMASTER_IPADDR net-tools,openssh-server,aptitude,curl
   ssh-keygen -f "/root/.ssh/known_hosts" -R $KUBEMASTER_IPADDR
   ssh-keygen -f "/home/sysadm/.ssh/known_hosts" -R $KUBEMASTER_IPADDR
 }
@@ -46,7 +46,7 @@ function create_datanode () {
   IPADDR=$IPPREFIX.$2
 
   # Create the virtual machine
-  $BASEDIR/scripts/deploy-vm.sh kubenode$1 $WORKERSRAM $CPUS 30G $ADMINPASSWORD $IPADDR net-tools,openssh-server,aptitude,curl
+  $BASEDIR/scripts/deploy-vm.sh kubenode$1 $WORKERSRAM $CPUS $STORAGEWORKERSIZE $ADMINPASSWORD $IPADDR net-tools,openssh-server,aptitude,curl
 
   # Reset locally cached SSH keys for the new virtual machine
   ssh-keygen -f "/root/.ssh/known_hosts" -R $IPADDR
@@ -173,6 +173,10 @@ elif [ "$ACTION" == "install" ]; then
   write_title "Executing ansible/kubernetes-storage.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-storage.yaml
 
+  # Install the monitoring solution
+  write_title "Executing ansible/kubernetes-monitoring.yaml"
+  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-monitoring.yaml
+
   # Install the Ingress implementation
   write_title "Executing ansible/kubernetes-ingress.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-ingress.yaml
@@ -185,10 +189,6 @@ elif [ "$ACTION" == "install" ]; then
   write_title "Executing ansible/kubernetes-firewall.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-firewall.yaml
 
-  # Install the monitoring solution
-  write_title "Executing ansible/kubernetes-monitoring.yaml"
-  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-monitoring.yaml
-
   # Install the Docker Registry
   write_title "Executing ansible/kubernetes-dockerreg.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-dockerreg.yaml
@@ -196,14 +196,6 @@ elif [ "$ACTION" == "install" ]; then
   # Deploy custom namespaces
   write_title "Executing ansible/kubernetes-customns.yaml"
   ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-customns.yaml
-
-  # Deploy the Stash backup
-  write_title "Executing ansible/kubernetes-backup.yaml"
-  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-backup.yaml
-
-  # Deploy the database management KubeDB
-  write_title "Executing ansible/kubernetes-kubedb.yaml"
-  ansible-playbook -i $BASEDIR/python/get-ansible-inventory.py $BASEDIR/ansible/kubernetes-kubedb.yaml
 
 elif [ "$ACTION" == "remove" ]; then
   # Clean the host especially with the Hypervisor environment

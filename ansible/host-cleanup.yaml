@@ -36,8 +36,6 @@
         name: "{{ item }}"
       with_items:
         - ssp_default
-        - ssp_data1
-        - ssp_data2
       ignore_errors: yes
 
     - name: Undefine the storage pools
@@ -46,8 +44,6 @@
         name: "{{ item }}"
       with_items:
         - ssp_default
-        - ssp_data1
-        - ssp_data2
       ignore_errors: yes
 
     # Remove the network configuration
