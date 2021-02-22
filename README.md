@@ -1,5 +1,7 @@
 # SSP - Single Server Platform
 
+Note: The master branch may be in an unstable or even broken state during development. Please use releases instead of the master branch in order to get a stable set of binaries.
+
 ## Prerequisits
 
 ### Hardware requirements
