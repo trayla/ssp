@@ -81,7 +81,7 @@ This picture shows an architectural overview of the desired platform:
 
 ![Diagram](docs/landscape.svg)
 
-<a href="https://app.diagrams.net/#Htrayla%2Fssp%2Fmaster%2Fdocs%2Flandscape.svg" target="_blank">Edit</a>
+<a href="https://app.diagrams.net/#Htrayla%2Ftop%2Fmaster%2Fdocs%2Flandscape.svg" target="_blank">Edit</a>
 
 ### Virtual machines:
 
