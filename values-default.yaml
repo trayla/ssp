@@ -1,23 +1,5 @@
 platform:
 
-  assets:
-    kubernetes:
-      version: 1.19.6-00
-    calico:
-      version: 3.17
-    istio:
-      version: 1.6.3
-    nginx:
-      version: 0.7.1
-    certmanager:
-      version: v1.1.0
-    grafana:
-      version: 5.2.1
-    longhorn:
-      version: 1.1.0
-    stern:
-      version: 1.11.0
-
   # Your domain, the platform should be reachable through
   domain: example.com
 
@@ -28,34 +10,6 @@ platform:
   admin:
     password: pw%ssp
 
-  # The worker nodes configuration
-  workers:
-    ram: 4096
-
-  # The storage settings
-  storage:
-    data:
-      size: 300G
-    backup:
-      s3:
-        bucket: <the S3 bucket name>
-        region: <the S3 region name like eu-central-1>
-        access_key_id: <the S3 access key identifier from the S3 console>
-        secret_access_key: <the S3 secret access key also from the S3 console>
-        endpoints: <the URL of the S3 API endpoints like http://s3.eu-central-1.wasabisys.com/>
-
   # The network settings
   network:
     ipprefix: 10.88.20
-
-  # The certificate issuer settings
-  certissuer:
-    # The certificate issuer stage (staging or production)
-    default: staging
-
-custom:
-
-  # Custom Kubernetes namespaces to be created upon installation 
-  namespaces:
-    # - name: my-namespace1
-    # - name: my-namespace2
