@@ -8,20 +8,17 @@ Note: The master branch may be in an unstable or even broken state during develo
 
 - A running bare metal machine with a plain Ubuntu 20.04 Server installation and root access (virtual machines are not supported)
 - Minimum 16 GB RAM (minimum 8 GB with slightly modified parameters)
-- Minimum 1 TB storage (minimum 150 GB with slightly modified parameters)
 
 ### Knowledge
 
 - An understanding of Linux based system management and command line tools
 - An understanding of virtualization with KVM
-- Knowledge about operating a Kubernetes platform
-- A basic understanding of GlusterFS
 
 ### Necessary preliminaries
 
 #### Storage
 
-Your system has to provide one directory which will be used as a KVM storage pool and therefore populated with disk images for the upcoming virtual machines. The following directory has to be created prior to the start of the installation procedure. 
+Your system has to provide one directory which will be used as a KVM storage pool and therefore populated with disk images for the upcoming virtual machines.
 
 ##### /vmpool
 
@@ -32,26 +29,12 @@ Create the directory of the default storage pool:
 mkdir -p /vmpool
 ```
 
-##### Data Devices
-
-Furthermore we need two storage devices to hold the payload data for the cluster (one per worker node). Each worker node provides a Longhorn storage operator which needs one disk. It has to be a partition of an arbitrary block device such as a phisical disk or a LVM logical volume. You have to assign these devices while staring the installation procedure a bit later. Keep in mind that these devices will be erased during installation.
-
-#### A sudo user for system administration
-
-Create a system administrator user and disable root
-```ShellSession
-adduser -u 990 sysadm
-usermod -aG sudo sysadm
-passwd -l root
-```
-
 #### Install scripts
 
 In order to execute the scripts you have to clone this GitHub repository to your server into the directory /opt/mgmt/ssp by issuing the following commands:
 ```ShellSession
 mkdir -p /opt/mgmt/ssp
 git clone https://github.com/trayla/ssp.git /opt/mgmt/ssp
-chown -R sysadm:sysadm /opt/mgmt
 ```
 
 The values file defines specific customizations of your own topology. A sample file is included in this repository. It should be copied to /opt/mgmt and customized before further installation.
@@ -72,7 +55,13 @@ sudo /opt/mgmt/ssp/platform.sh prepare
 
 Install the platform with the following command. Replace the storage devices /dev/sdx1 and /dev/sdy1 with the devices of your choice.
 ```ShellSession
-sudo /opt/mgmt/ssp/platform.sh install /dev/sdx1 /dev/sdy1
+sudo /opt/mgmt/ssp/platform.sh install
+```
+
+Install further virtual machines with the following command:
+```ShellSession
+sudo /opt/mgmt/ssp/platform.sh add-vm <vmname> <ipsuffix> <ram> <cpus> <storagesize>
+sudo /opt/mgmt/ssp/platform.sh add-vm test1 10 4096 1 30G
 ```
 
 This command removes the whole plattform from your host:
@@ -116,21 +105,3 @@ ssh sysadm@<ipaddr>
 Purpose: Management machine
 
 IP Address: XX.ZZ.YY.2
-
-#### kubemaster
-
-Purpose: Kubernetes master
-
-IP Address: XX.YY.ZZ.10
-
-#### kubenode1
-
-Purpose: First Kubernetes worker node with data storage
-
-IP Address: XX.YY.ZZ.11
-
-#### kubenode2
-
-Purpose: Second Kubernetes worker node with data storage
-
-IP Address: XX.YY.ZZ.12

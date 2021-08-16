@@ -7,8 +7,9 @@ RAM=$2
 CPUS=$3
 DISKSIZE=$4
 PASSWORD=$5
-IPADDR=$6
-APTPKGS=$7
+IPPREFIX=$6
+IPADDR=$7
+APTPKGS=$8
 DISKFILE=/vmpool/${SSP_PREFIX}_${HOSTNAME}_root.qcow2
 
 # Generate the startup file which will be called the first time the virtual machines wakes up
@@ -35,7 +36,6 @@ virt-builder ubuntu-18.04 \
   --timezone UTC \
   --root-password password:$PASSWORD \
   --ssh-inject root:file:/root/.ssh/id_rsa.pub \
-  --ssh-inject root:file:/home/sysadm/.ssh/id_rsa.pub \
   --install $APTPKGS \
   --firstboot /tmp/startup.sh
 
@@ -58,7 +58,7 @@ network:
     enp1s0:
       dhcp4: no
       addresses: [$IPADDR/24]
-      gateway4: 10.88.20.1
+      gateway4: $IPPREFIX.1
       nameservers:
         addresses: [8.8.8.8]
 EOF

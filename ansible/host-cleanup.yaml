@@ -7,25 +7,19 @@
     # Remove the virtual machines
 
     - name: Destroy the virtual machines
-      virt:
-        command: destroy
-        name: "{{ item }}"
-      with_items:
-        - ssp_console
-        - ssp_kubemaster
-        - ssp_kubenode1
-        - ssp_kubenode2
+      shell: |
+        for vm in $(virsh list --all --name)
+        do
+          virsh destroy $vm
+        done
       ignore_errors: yes
 
     - name: Undefine the virtual machines
-      virt:
-        command: undefine
-        name: "{{ item }}"
-      with_items:
-        - ssp_console
-        - ssp_kubemaster
-        - ssp_kubenode1
-        - ssp_kubenode2
+      shell: |
+        for vm in $(virsh list --all --name)
+        do
+          virsh undefine $vm
+        done
       ignore_errors: yes
 
     # Remove the storage pools
